@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+.env
+*.env.local
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Database
+*.db
+*.sqlite
+prisma/migrations/dev.db
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+coverage/
+.coverage
+htmlcov/
+
+# Docker
+.docker/
+
+# Keys and secrets
+*.pem
+*.key
+*.cert
+
+# Temp
+tmp/
+.cache/
