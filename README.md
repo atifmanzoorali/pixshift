@@ -2,189 +2,168 @@
 
 A production-grade image conversion SaaS. Register, create API keys from a dashboard, and use those keys to convert, compress, and resize images via a clean REST API.
 
-Built to demonstrate what production-grade code looks like: layered architecture, hash-only key storage, MIME validation, structured logging, Alembic migrations, and a full test suite — not just a working prototype.
+Built as a portfolio project to demonstrate what production-grade code looks like: layered architecture, hash-only key storage, MIME validation from file bytes, Row Level Security, and a full test suite — not a prototype.
 
 ---
 
 ## What It Does
 
-- **Format conversion** — PNG, JPG, WebP, AVIF, GIF, BMP, TIFF as input; PNG, JPG, WebP, AVIF as output
-- **Compression** — quality control from 1–100
+- **Format conversion** — PNG, JPG, WebP, AVIF, GIF as input; PNG, JPG, WebP, AVIF as output
+- **Compression** — quality control from 1–100, output smaller than input
 - **Resize** — width × height with optional aspect ratio lock
-- **API key management** — create multiple keys, name them, revoke them from a dashboard
-- **Usage tracking** — see calls today, this month, and this hour per key
+- **API key management** — create multiple keys, name them, revoke them from the dashboard
+- **Usage tracking** — calls per key, per operation, with timestamps
 
 ---
 
 ## Architecture
 
-Two parts. One repository.
+A single Next.js application. No separate backend, no Docker, no Python.
 
 ```
 pixshift/
-├── api/     ← FastAPI + Python: the image conversion API
-└── web/     ← Next.js + TypeScript: the product UI
+└── web/                    ← the entire application
+    └── src/
+        ├── app/
+        │   ├── page.tsx                # Landing page
+        │   ├── (auth)/                 # Register / Login / Forgot password
+        │   ├── dashboard/              # Protected dashboard UI
+        │   └── api/v1/                 # Image conversion API (Route Handlers)
+        ├── components/
+        │   ├── landing/                # Landing page sections
+        │   └── dashboard/              # Dashboard shell + UI
+        ├── services/                   # Auth, keys, usage — business logic layer
+        ├── hooks/                      # useAuth, useApiKeys
+        ├── lib/supabase/               # Browser + server Supabase clients
+        └── types/                      # TypeScript interfaces
 ```
 
-The web app handles registration, login, and API key management. The API handles image processing. Developers integrate using API keys from the dashboard, not the web JWT.
+**Stack:**
+- Next.js 14 (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui
+- Supabase — PostgreSQL database + email/password auth + Row Level Security
+- Sharp — image processing inside Next.js API Route Handlers
+- Vercel — deployment (free plan)
 
-See [docs/architecture.md](docs/architecture.md) for the full breakdown.
+**Two auth systems — never mixed:**
+
+| Auth type | Who uses it | How |
+|---|---|---|
+| Supabase session | Dashboard users (humans) | httpOnly cookie via @supabase/ssr |
+| API key (`X-API-Key`) | Developers calling the image API | SHA-256 hash stored in Supabase |
 
 ---
 
-## Quick Start (Docker)
+## Quick Start
 
-Requires: Docker and docker-compose installed.
+Requires: Node.js 20+ and a Supabase project.
 
 ```bash
 git clone https://github.com/atifmanzoorali/pixshift.git
-cd pixshift
+cd pixshift/web
 
-# Copy environment files
-cp api/.env.example api/.env
-cp web/.env.example web/.env.local
-
-# Start everything
-docker-compose -f docker/docker-compose.yml up --build
-```
-
-- Web app: http://localhost:3000
-- API: http://localhost:8000
-- API docs (Swagger): http://localhost:8000/docs
-
----
-
-## Running Locally (without Docker)
-
-### API
-
-Requires Python 3.12 and a running PostgreSQL + Redis instance.
-
-```bash
-cd api
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements-dev.txt
-
-cp .env.example .env
-# Edit .env — fill in DATABASE_URL, REDIS_URL, SECRET_KEY
-
-alembic upgrade head
-uvicorn app.main:app --reload
-```
-
-### Web
-
-Requires Node.js 20+.
-
-```bash
-cd web
 npm install
 
 cp .env.example .env.local
-# Edit .env.local — set NEXT_PUBLIC_API_URL
+# Edit .env.local — fill in your Supabase URL and keys (see Environment Variables below)
 
 npm run dev
 ```
 
+App runs at: **http://localhost:3000**
+
 ---
 
-## Running Tests
+## Environment Variables
 
-### API tests
+`web/.env.local` (never committed — copy from `.env.example`):
 
-```bash
-cd api
-pytest tests/ -v
-pytest tests/ --cov=app --cov-report=term-missing
+```env
+# Supabase — get from: supabase.com/dashboard/project/YOUR_REF/settings/api
+NEXT_PUBLIC_SUPABASE_URL=https://your-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
 ```
 
-### Web tests
-
-```bash
-cd web
-npm test
-```
+`SUPABASE_SERVICE_ROLE_KEY` is server-only — it bypasses Row Level Security for API key verification. Never expose it to the client or add a `NEXT_PUBLIC_` prefix.
 
 ---
 
 ## API Reference
 
-See [docs/api-contracts.md](docs/api-contracts.md) for full endpoint documentation.
+All endpoints require an API key in the `X-API-Key` header. Keys are created from the dashboard after registering.
 
-Quick example — convert a PNG to WebP:
-
+**Convert format**
 ```bash
-# 1. Register and get an API key from the dashboard at localhost:3000
-# 2. Use the key in your API calls:
-
-curl -X POST http://localhost:8000/api/v1/convert \
+curl -X POST https://your-domain.com/api/v1/convert \
   -H "X-API-Key: pxs_live_your_key_here" \
   -F "file=@image.png" \
   -F "target_format=webp" \
   --output result.webp
 ```
 
+**Compress**
+```bash
+curl -X POST https://your-domain.com/api/v1/compress \
+  -H "X-API-Key: pxs_live_your_key_here" \
+  -F "file=@image.jpg" \
+  -F "quality=75" \
+  --output compressed.jpg
+```
+
+**Resize**
+```bash
+curl -X POST https://your-domain.com/api/v1/resize \
+  -H "X-API-Key: pxs_live_your_key_here" \
+  -F "file=@image.png" \
+  -F "width=800" \
+  -F "height=600" \
+  --output resized.png
+```
+
+**Limits:** 4MB max file size. Supported input: JPEG, PNG, WebP, AVIF, GIF. MIME type verified from file bytes — file extension is ignored.
+
+See [docs/api-contracts.md](docs/api-contracts.md) for full endpoint documentation.
+
 ---
 
-## Environment Variables
+## npm Scripts
 
-### api/.env
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL async connection string |
-| `REDIS_URL` | Yes | — | Redis connection string |
-| `SECRET_KEY` | Yes | — | JWT signing secret (generate with `secrets.token_hex(32)`) |
-| `ENVIRONMENT` | No | `development` | `development` or `production` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | No | `60` | JWT lifetime |
-| `MAX_FILE_SIZE_MB` | No | `10` | Max upload size |
-| `RATE_LIMIT_PER_HOUR` | No | `100` | API calls per key per hour |
-
-### web/.env.local
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Yes | URL of the FastAPI backend |
+| Script | What it does |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Run the production build |
+| `npm test` | Run all Vitest tests |
+| `npm run typecheck` | TypeScript check with no emit |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Run Prettier |
+| `npm run db:types` | Regenerate TypeScript types from Supabase schema |
 
 ---
 
 ## Design Decisions
 
-**Why FastAPI + Python?** Pillow is a Python library. Processing images in the same runtime as the API eliminates a service boundary. FastAPI generates OpenAPI docs automatically and handles async requests efficiently.
+**Why a single Next.js app instead of a separate API?** Sharp runs in Node.js, which is the same runtime Next.js uses. Keeping everything in one app removes a service boundary, eliminates CORS, and deploys as a single unit on Vercel. No Docker, no Python, no Redis.
 
-**Why Next.js?** Handles the marketing landing page (needs SEO) and the interactive dashboard in one framework. TypeScript first-class. Single deployment unit.
+**Why Supabase?** Handles authentication, PostgreSQL, and Row Level Security. Session management via `@supabase/ssr` keeps tokens in httpOnly cookies — not localStorage — and middleware refreshes them on every request. The database can be migrated off Supabase if needed; the schema is portable SQL.
 
-**Why hash-only key storage?** This is how Stripe and GitHub store API keys. If the database is compromised, an attacker gets hashes, not usable credentials. The raw key is shown once at creation and never stored.
+**Why hash-only key storage?** This is how Stripe and GitHub store API keys. If the database is compromised, an attacker gets SHA-256 hashes, not usable credentials. The raw key is shown once at creation and never stored anywhere.
 
-**Why two auth systems?** JWT for the dashboard (humans who log in interactively), API keys for the integration (developers who store a credential in their environment). Mixing them would force bad compromises in both directions.
+**Why two auth systems?** Supabase sessions are for the dashboard (humans logging in interactively). API keys are for developers calling the image endpoints from their code. Mixing them creates bad trade-offs in both directions: sessions are short-lived, API keys are long-lived by design.
 
-**Why Alembic migrations?** `Base.metadata.create_all()` is fine for prototypes. It is not acceptable for a production codebase because it provides no migration history and cannot safely evolve an existing database. Every schema change in this project is a versioned, reversible migration file.
-
-See [docs/decisions.md](docs/decisions.md) for the full ADR log.
+See [docs/decisions.md](docs/decisions.md) for the full decision log.
 
 ---
 
-## npm Scripts (web/)
+## Database Schema
 
-| Script | What it does |
-|--------|-------------|
-| `npm run dev` | Start Next.js development server |
-| `npm run build` | Compile TypeScript, build for production |
-| `npm run start` | Run the production build |
-| `npm test` | Run all tests |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Run Prettier |
-| `npm run typecheck` | TypeScript check with no emit |
+Three tables, all with Row Level Security enabled. Users can only read and write their own rows.
 
-## Python Commands (api/)
+```sql
+profiles       -- created automatically on signup (trigger on auth.users)
+api_keys       -- created from the dashboard, SHA-256 hash stored, raw key never persisted
+usage_logs     -- one row per image API call, linked to api_key_id and user_id
+```
 
-| Command | What it does |
-|---------|-------------|
-| `uvicorn app.main:app --reload` | Start API development server |
-| `pytest tests/ -v` | Run all tests |
-| `alembic upgrade head` | Apply all pending migrations |
-| `alembic revision --autogenerate -m "description"` | Generate a new migration |
-| `black app/ tests/` | Format Python code |
-| `ruff check app/ tests/` | Lint Python code |
-| `mypy app/` | Type check Python code |
+Run `npm run db:types` after any schema change to regenerate TypeScript types.
