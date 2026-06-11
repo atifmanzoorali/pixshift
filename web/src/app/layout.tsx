@@ -29,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-neutral-900 text-neutral-50 font-body antialiased">
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </body>
     </html>
   );
