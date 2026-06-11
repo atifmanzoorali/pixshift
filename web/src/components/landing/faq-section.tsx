@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
 };
 
 interface FAQ {
@@ -51,13 +51,13 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-border py-5">
+    <div className="border-b border-border">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between text-left gap-4 group"
+        className="flex w-full items-center justify-between text-left gap-4 py-6 group"
         aria-expanded={open}
       >
-        <span className="text-base md:text-lg font-semibold text-neutral-50 group-hover:text-neutral-100 transition-colors">
+        <span className="text-base md:text-lg font-semibold text-neutral-50 group-hover:text-neutral-200 transition-colors duration-150">
           {question}
         </span>
         <motion.div
@@ -72,13 +72,14 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
+            key="answer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <p className="pt-4 text-sm md:text-base text-muted leading-relaxed">{answer}</p>
+            <p className="pb-6 text-sm md:text-base text-muted leading-relaxed">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -88,21 +89,27 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
 
 export function FAQSection(): JSX.Element {
   return (
-    <section id="faq" className="w-full px-6 md:px-8 lg:px-12 py-16 md:py-20 lg:py-24 bg-surface">
+    <section
+      id="faq"
+      className="w-full bg-neutral-900 px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-32"
+    >
       <div className="max-w-7xl mx-auto">
         <motion.div
-          className="max-w-2xl mx-auto text-center mb-12"
+          className="max-w-2xl mx-auto text-center mb-16"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
           variants={fadeUp}
         >
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-neutral-50 tracking-tight">
+          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-4">
+            FAQ
+          </p>
+          <h2 className="text-4xl md:text-5xl font-display font-bold text-neutral-50 tracking-tight">
             Questions we actually get.
           </h2>
         </motion.div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto border-t border-border">
           {faqs.map((faq, i) => (
             <FAQItem key={i} question={faq.question} answer={faq.answer} />
           ))}

@@ -1,5 +1,3 @@
-'use client';
-
 import { Navbar } from './navbar';
 import { HeroSection } from './hero-section';
 import { SocialProofBar } from './social-proof-bar';
@@ -13,17 +11,19 @@ import { Footer } from './footer';
 
 export function LandingPage(): JSX.Element {
   return (
-    <main className="bg-neutral-900 text-neutral-50">
+    <>
       <Navbar />
-      <HeroSection />
-      <SocialProofBar />
-      <ProblemSection />
-      <FeaturesSection />
-      <HowItWorks />
-      <TestimonialsSection />
-      <FAQSection />
-      <CTASection />
+      <main>
+        <HeroSection />
+        <SocialProofBar />
+        <ProblemSection />
+        <FeaturesSection />
+        <HowItWorks />
+        <TestimonialsSection />
+        <FAQSection />
+        <CTASection />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
