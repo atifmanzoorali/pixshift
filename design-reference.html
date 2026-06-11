@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixShift — Design System Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary:        #7C3AED;
+    --primary-hover:  #6D28D9;
+    --secondary:      #1E1B33;
+    --accent:         #A78BFA;
+    --n50:  #F4F4FF;
+    --n100: #E8E7F5;
+    --n200: #C5C3D8;
+    --n300: #A09DB8;
+    --n400: #7B7894;
+    --n500: #5A5770;
+    --n600: #3D3A52;
+    --n700: #2A2840;
+    --n800: #1A1830;
+    --n900: #09090F;
+    --success:     #22C55E;
+    --success-bg:  #052E16;
+    --warning:     #F59E0B;
+    --warning-bg:  #1C1500;
+    --error:       #EF4444;
+    --error-bg:    #2A0808;
+    --info:        #3B82F6;
+    --info-bg:     #0C1A2E;
+    --bg-page:     #09090F;
+    --bg-surface:  #131220;
+    --bg-elevated: #1A1830;
+    --border:      #252342;
+    --border-strong: #3D3A52;
+    --text:        #F4F4FF;
+    --text-sec:    #9490AD;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.4), 0 0 0 1px rgba(124,58,237,.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.5), 0 0 0 1px rgba(124,58,237,.10);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,.6), 0 0 20px rgba(124,58,237,.12);
+    --shadow-xl: 0 16px 48px rgba(0,0,0,.7), 0 0 40px rgba(124,58,237,.18);
+  }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Layout */
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+  .section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .section-sub {
+    font-size: 14px; color: var(--text-sec); margin-bottom: 40px;
+  }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .flex { display: flex; }
+  .flex-wrap { flex-wrap: wrap; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+  .gap-6 { gap: 24px; }
+  .items-center { align-items: center; }
+  .label-small {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-sec); margin-bottom: 16px;
+  }
+
+  /* Header */
+  .ds-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 0;
+  }
+  .ds-header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px; font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .ds-header p { font-size: 14px; color: var(--text-sec); margin-top: 6px; }
+  .ds-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 4px;
+    background: rgba(124,58,237,.15); color: var(--accent);
+    font-size: 12px; font-weight: 500; margin-top: 10px;
+  }
+
+  /* Color swatches */
+  .swatch-group { margin-bottom: 32px; }
+  .swatch-group-title {
+    font-size: 13px; font-weight: 600; color: var(--text-sec);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px;
+  }
+  .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch {
+    display: flex; flex-direction: column;
+    width: 88px;
+  }
+  .swatch-color {
+    height: 52px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .swatch-info { padding: 6px 2px; }
+  .swatch-name { font-size: 11px; font-weight: 600; color: var(--text); }
+  .swatch-hex { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-sec); }
+
+  /* Typography */
+  .type-row {
+    display: flex; align-items: baseline; gap: 24px;
+    padding: 16px 0; border-bottom: 1px solid var(--border);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-meta {
+    width: 180px; flex-shrink: 0;
+    font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-sec);
+  }
+  .type-sample { color: var(--text); }
+
+  /* Spacing */
+  .space-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 8px 0;
+  }
+  .space-bar {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    height: 20px; border-radius: 4px; min-width: 4px;
+  }
+  .space-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-sec); width: 120px; }
+
+  /* Radius */
+  .radius-item {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .radius-box {
+    width: 64px; height: 64px;
+    background: var(--secondary); border: 1px solid var(--border);
+  }
+  .radius-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-sec); text-align: center; }
+
+  /* Shadows */
+  .shadow-item {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .shadow-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .shadow-desc { font-size: 12px; color: var(--text-sec); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer;
+    border: none; transition: all 150ms ease; text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--primary); color: #fff;
+    padding: 12px 28px; border-radius: 9999px; font-size: 14px;
+  }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-secondary {
+    background: var(--secondary); color: var(--accent);
+    border: 1px solid var(--border); padding: 11px 24px;
+    border-radius: 12px; font-size: 14px;
+  }
+  .btn-ghost {
+    background: transparent; color: var(--n300);
+    padding: 11px 20px; border-radius: 12px; font-size: 14px;
+  }
+  .btn-destructive {
+    background: var(--error); color: #fff;
+    padding: 11px 24px; border-radius: 12px; font-size: 14px;
+  }
+  .btn-sm { padding: 8px 20px; font-size: 13px; }
+  .btn-lg { padding: 16px 36px; font-size: 16px; }
+  .btn-disabled {
+    background: var(--n700); color: var(--n500);
+    padding: 12px 28px; border-radius: 9999px; font-size: 14px; cursor: not-allowed;
+  }
+
+  /* Inputs */
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-label { font-size: 14px; font-weight: 500; color: var(--n200); }
+  .input-field {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-family: 'Inter', sans-serif;
+    font-size: 14px; color: var(--text); outline: none; width: 100%;
+  }
+  .input-field::placeholder { color: var(--n500); }
+  .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.20); }
+  .input-field.error { border-color: var(--error); }
+  .input-helper { font-size: 12px; color: var(--n400); }
+  .input-error-text { font-size: 12px; color: var(--error); }
+
+  /* Cards */
+  .card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .card-body { font-size: 14px; color: var(--text-sec); line-height: 1.6; }
+  .card-interactive { cursor: pointer; transition: all 150ms ease; }
+  .card-interactive:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+
+  /* Code block */
+  .code-block {
+    background: var(--bg-page); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--accent); overflow-x: auto; line-height: 1.7;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 10px; border-radius: 4px;
+    font-size: 12px; font-weight: 500;
+  }
+  .badge-primary { background: rgba(124,58,237,.15); color: var(--accent); }
+  .badge-success { background: var(--success-bg); color: var(--success); }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-error { background: var(--error-bg); color: var(--error); }
+  .badge-neutral { background: var(--n700); color: var(--n300); }
+
+  /* Alerts */
+  .alert {
+    padding: 16px; border-radius: 8px;
+    border-left: 3px solid; display: flex; gap: 12px;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .alert-body { font-size: 13px; opacity: 0.85; }
+  .alert-success { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .alert-warning { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+  .alert-error { background: var(--error-bg); border-color: var(--error); color: var(--error); }
+  .alert-info { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+
+  /* Navbar */
+  .navbar {
+    height: 64px; background: var(--bg-page);
+    border: 1px solid var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+  }
+  .navbar-logo {
+    font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--text);
+  }
+  .navbar-logo span { color: var(--accent); }
+  .navbar-links { display: flex; gap: 28px; }
+  .navbar-link { font-size: 14px; color: var(--text-sec); text-decoration: none; }
+  .navbar-link:hover { color: var(--text); }
+
+  /* Hero section */
+  .hero {
+    background: var(--bg-page);
+    border: 1px solid var(--border); border-radius: 16px;
+    padding: 80px 40px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25);
+    padding: 5px 14px; border-radius: 9999px;
+    font-size: 13px; font-weight: 500; color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 52px; font-weight: 800; line-height: 1.08;
+    letter-spacing: -0.02em; color: var(--text); margin-bottom: 20px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 18px; color: var(--text-sec); max-width: 520px;
+    margin: 0 auto 36px; line-height: 1.6;
+  }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hero-code {
+    margin-top: 48px; max-width: 540px; margin-left: auto; margin-right: auto;
+    text-align: left; position: relative;
+  }
+
+  /* Feature cards */
+  .feature-card {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    transition: all 150ms ease;
+  }
+  .feature-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+  .feature-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: rgba(124,58,237,.15); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; font-size: 20px;
+  }
+  .feature-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .feature-desc { font-size: 14px; color: var(--text-sec); line-height: 1.6; }
+
+  /* Dashboard preview */
+  .dashboard-shell {
+    background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .dash-header {
+    padding: 16px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .dash-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; }
+  .dash-body { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .dash-row {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .dash-key-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .dash-key-prefix {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent);
+  }
+  .dash-key-meta { font-size: 12px; color: var(--text-sec); }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .stat-card {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+  }
+  .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 12px; color: var(--text-sec); margin-top: 4px; }
+
+  /* CTA section */
+  .cta-section {
+    background: linear-gradient(135deg, var(--secondary) 0%, rgba(124,58,237,0.15) 100%);
+    border: 1px solid rgba(124,58,237,.3); border-radius: 16px;
+    padding: 64px 40px; text-align: center;
+  }
+  .cta-section h2 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700;
+    color: var(--text); margin-bottom: 12px;
+  }
+  .cta-section p { font-size: 16px; color: var(--text-sec); margin-bottom: 28px; }
+
+  /* Footer */
+  .footer-preview {
+    background: var(--bg-page); border: 1px solid var(--border);
+    border-radius: 12px; padding: 40px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 32px; }
+  .footer-logo { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .footer-tagline { font-size: 14px; color: var(--text-sec); line-height: 1.6; }
+  .footer-col-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+  .footer-links { display: flex; flex-direction: column; gap: 8px; }
+  .footer-link { font-size: 13px; color: var(--n400); text-decoration: none; }
+  .footer-bottom {
+    padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-copy { font-size: 13px; color: var(--n500); }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="ds-header">
+  <div class="container">
+    <h1>PixShift</h1>
+    <p>Design System Reference — generated 2026-06-11</p>
+    <span class="ds-tag">Dark Mode · Space Grotesk + Inter · Tailwind CSS</span>
+  </div>
+</div>
+
+<!-- 1. COLORS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Color System</div>
+    <div class="section-sub">Every color used in the product. Never use a hex value not listed here.</div>
+
+    <div class="swatch-group">
+      <div class="swatch-group-title">Brand</div>
+      <div class="swatch-row">
+        <div class="swatch"><div class="swatch-color" style="background:#7C3AED"></div><div class="swatch-info"><div class="swatch-name">primary</div><div class="swatch-hex">#7C3AED</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#6D28D9"></div><div class="swatch-info"><div class="swatch-name">primary-hover</div><div class="swatch-hex">#6D28D9</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#1E1B33"></div><div class="swatch-info"><div class="swatch-name">secondary</div><div class="swatch-hex">#1E1B33</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#A78BFA"></div><div class="swatch-info"><div class="swatch-name">accent</div><div class="swatch-hex">#A78BFA</div></div></div>
+      </div>
+    </div>
+
+    <div class="swatch-group">
+      <div class="swatch-group-title">Neutral Scale</div>
+      <div class="swatch-row">
+        <div class="swatch"><div class="swatch-color" style="background:#F4F4FF;border-color:rgba(0,0,0,.2)"></div><div class="swatch-info"><div class="swatch-name">neutral-50</div><div class="swatch-hex">#F4F4FF</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#E8E7F5;border-color:rgba(0,0,0,.15)"></div><div class="swatch-info"><div class="swatch-name">neutral-100</div><div class="swatch-hex">#E8E7F5</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#C5C3D8"></div><div class="swatch-info"><div class="swatch-name">neutral-200</div><div class="swatch-hex">#C5C3D8</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#A09DB8"></div><div class="swatch-info"><div class="swatch-name">neutral-300</div><div class="swatch-hex">#A09DB8</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#7B7894"></div><div class="swatch-info"><div class="swatch-name">neutral-400</div><div class="swatch-hex">#7B7894</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#5A5770"></div><div class="swatch-info"><div class="swatch-name">neutral-500</div><div class="swatch-hex">#5A5770</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#3D3A52"></div><div class="swatch-info"><div class="swatch-name">neutral-600</div><div class="swatch-hex">#3D3A52</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#2A2840"></div><div class="swatch-info"><div class="swatch-name">neutral-700</div><div class="swatch-hex">#2A2840</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#1A1830"></div><div class="swatch-info"><div class="swatch-name">neutral-800</div><div class="swatch-hex">#1A1830</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#09090F"></div><div class="swatch-info"><div class="swatch-name">neutral-900</div><div class="swatch-hex">#09090F</div></div></div>
+      </div>
+    </div>
+
+    <div class="swatch-group">
+      <div class="swatch-group-title">Semantic</div>
+      <div class="swatch-row">
+        <div class="swatch"><div class="swatch-color" style="background:#22C55E"></div><div class="swatch-info"><div class="swatch-name">success</div><div class="swatch-hex">#22C55E</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#052E16"></div><div class="swatch-info"><div class="swatch-name">success-bg</div><div class="swatch-hex">#052E16</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#F59E0B"></div><div class="swatch-info"><div class="swatch-name">warning</div><div class="swatch-hex">#F59E0B</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#1C1500"></div><div class="swatch-info"><div class="swatch-name">warning-bg</div><div class="swatch-hex">#1C1500</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#EF4444"></div><div class="swatch-info"><div class="swatch-name">error</div><div class="swatch-hex">#EF4444</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#2A0808"></div><div class="swatch-info"><div class="swatch-name">error-bg</div><div class="swatch-hex">#2A0808</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#3B82F6"></div><div class="swatch-info"><div class="swatch-name">info</div><div class="swatch-hex">#3B82F6</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#0C1A2E"></div><div class="swatch-info"><div class="swatch-name">info-bg</div><div class="swatch-hex">#0C1A2E</div></div></div>
+      </div>
+    </div>
+
+    <div class="swatch-group">
+      <div class="swatch-group-title">Backgrounds &amp; Surfaces</div>
+      <div class="swatch-row">
+        <div class="swatch"><div class="swatch-color" style="background:#09090F"></div><div class="swatch-info"><div class="swatch-name">bg-page</div><div class="swatch-hex">#09090F</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#131220"></div><div class="swatch-info"><div class="swatch-name">bg-surface</div><div class="swatch-hex">#131220</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#1A1830"></div><div class="swatch-info"><div class="swatch-name">bg-elevated</div><div class="swatch-hex">#1A1830</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#252342"></div><div class="swatch-info"><div class="swatch-name">border-default</div><div class="swatch-hex">#252342</div></div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#3D3A52"></div><div class="swatch-info"><div class="swatch-name">border-strong</div><div class="swatch-hex">#3D3A52</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. TYPOGRAPHY -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Typography</div>
+    <div class="section-sub">Space Grotesk (display) · Inter (body) · JetBrains Mono (code)</div>
+
+    <div class="type-row">
+      <div class="type-meta">text-xs · 12px · 400</div>
+      <div class="type-sample" style="font-size:12px;color:#9490AD">API key last used · 2 hours ago · 12 calls today</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-sm · 14px · 400</div>
+      <div class="type-sample" style="font-size:14px;color:#A09DB8">Form labels, table data, helper text, secondary UI</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-base · 16px · 400</div>
+      <div class="type-sample" style="font-size:16px">Body text and paragraphs. Most image conversion APIs charge $84–150/month for what is, at its core, a Pillow operation.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-lg · 18px · 400</div>
+      <div class="type-sample" style="font-size:18px;color:#C5C3D8">Lead paragraph. The gap is in the packaging.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-xl · 20px · 500</div>
+      <div class="type-sample" style="font-size:20px;font-weight:500">Section labels and subheadings</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-2xl · 24px · 600<br>Space Grotesk</div>
+      <div class="type-sample" style="font-size:24px;font-weight:600;font-family:'Space Grotesk',sans-serif">Dashboard Section Heading</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-3xl · 30px · 700<br>Space Grotesk</div>
+      <div class="type-sample" style="font-size:30px;font-weight:700;font-family:'Space Grotesk',sans-serif">Page Heading</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-4xl · 36px · 700<br>Space Grotesk</div>
+      <div class="type-sample" style="font-size:36px;font-weight:700;font-family:'Space Grotesk',sans-serif">Hero Subheadline</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">text-5xl · 48px · 800<br>Space Grotesk</div>
+      <div class="type-sample" style="font-size:48px;font-weight:800;font-family:'Space Grotesk',sans-serif;line-height:1.08">Hero <span style="color:#A78BFA">Headline</span></div>
+    </div>
+
+    <hr class="divider">
+    <div class="label-small">Monospace</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#A78BFA;background:#09090F;padding:14px 18px;border-radius:8px;border:1px solid #252342">
+      pxs_live_a3f9d2c1b8e4k7m2n6p0q5r1<br>
+      POST /api/v1/convert HTTP/1.1<br>
+      X-API-Key: pxs_live_xxxxxxxxxxxx
+    </div>
+  </div>
+</div>
+
+<!-- 3. SPACING -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Spacing Scale</div>
+    <div class="section-sub">4px base unit. Never use arbitrary pixel values.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 48px">
+      <div class="space-row"><div class="space-label">space-1 · 4px</div><div class="space-bar" style="width:4px"></div></div>
+      <div class="space-row"><div class="space-label">space-2 · 8px</div><div class="space-bar" style="width:8px"></div></div>
+      <div class="space-row"><div class="space-label">space-3 · 12px</div><div class="space-bar" style="width:12px"></div></div>
+      <div class="space-row"><div class="space-label">space-4 · 16px</div><div class="space-bar" style="width:16px"></div></div>
+      <div class="space-row"><div class="space-label">space-5 · 20px</div><div class="space-bar" style="width:20px"></div></div>
+      <div class="space-row"><div class="space-label">space-6 · 24px</div><div class="space-bar" style="width:24px"></div></div>
+      <div class="space-row"><div class="space-label">space-8 · 32px</div><div class="space-bar" style="width:32px"></div></div>
+      <div class="space-row"><div class="space-label">space-10 · 40px</div><div class="space-bar" style="width:40px"></div></div>
+      <div class="space-row"><div class="space-label">space-12 · 48px</div><div class="space-bar" style="width:48px"></div></div>
+      <div class="space-row"><div class="space-label">space-16 · 64px</div><div class="space-bar" style="width:64px"></div></div>
+      <div class="space-row"><div class="space-label">space-20 · 80px</div><div class="space-bar" style="width:80px"></div></div>
+      <div class="space-row"><div class="space-label">space-24 · 96px</div><div class="space-bar" style="width:96px"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. BORDER RADIUS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Border Radius</div>
+    <div class="section-sub">Primary CTAs always use rounded-full. Cards use rounded-lg. Inputs use rounded-md.</div>
+    <div class="flex gap-6" style="flex-wrap:wrap;align-items:flex-end">
+      <div class="radius-item"><div class="radius-box" style="border-radius:0;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">none · 0px</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:4px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">sm · 4px<br>badges</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:6px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">default · 6px</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:8px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">md · 8px<br>inputs</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:12px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">lg · 12px<br>cards</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:16px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">xl · 16px</div></div>
+      <div class="radius-item"><div class="radius-box" style="border-radius:9999px;border:1px solid #252342;background:#1E1B33"></div><div class="radius-label">full<br>CTA buttons</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. SHADOWS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Shadows / Elevation</div>
+    <div class="section-sub">Purple-tinted shadows for cohesion. Not generic grey.</div>
+    <div class="grid-4">
+      <div class="shadow-item" style="box-shadow:none"><div class="shadow-name">shadow-none</div><div class="shadow-desc">Flat — dividers, inline</div></div>
+      <div class="shadow-item" style="box-shadow:var(--shadow-sm)"><div class="shadow-name">shadow-sm</div><div class="shadow-desc">Cards, inputs at rest</div></div>
+      <div class="shadow-item" style="box-shadow:var(--shadow-md)"><div class="shadow-name">shadow-md</div><div class="shadow-desc">Dropdowns, hover states</div></div>
+      <div class="shadow-item" style="box-shadow:var(--shadow-lg)"><div class="shadow-name">shadow-lg</div><div class="shadow-desc">Modals, popovers</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. BUTTONS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Buttons</div>
+    <div class="section-sub">Primary = pill. Secondary & ghost = rounded-lg. Never swap these.</div>
+
+    <div class="label-small">Variants</div>
+    <div class="flex gap-4 items-center" style="margin-bottom:32px;flex-wrap:wrap">
+      <button class="btn btn-primary">Get API Key</button>
+      <button class="btn btn-secondary">View Docs</button>
+      <button class="btn btn-ghost">Learn More</button>
+      <button class="btn btn-destructive">Revoke Key</button>
+      <button class="btn btn-disabled" disabled>Processing...</button>
+    </div>
+
+    <div class="label-small">Sizes (Primary)</div>
+    <div class="flex gap-4 items-center" style="flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm">Small</button>
+      <button class="btn btn-primary">Medium (default)</button>
+      <button class="btn btn-primary btn-lg">Large</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. INPUTS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Form Inputs</div>
+    <div class="section-sub">Dark background, purple focus ring. Error state uses red border.</div>
+    <div class="grid-3" style="gap:32px">
+      <div class="input-group">
+        <label class="input-label">Email address</label>
+        <input class="input-field" type="email" placeholder="you@example.com">
+        <span class="input-helper">We'll send your API key here.</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Key name</label>
+        <input class="input-field" type="text" value="Production" style="border-color:#7C3AED;box-shadow:0 0 0 3px rgba(124,58,237,0.20)">
+        <span class="input-helper">Focus state shown above.</span>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Email address</label>
+        <input class="input-field error" type="email" value="notanemail">
+        <span class="input-error-text">Please enter a valid email address.</span>
+      </div>
+    </div>
+    <div style="margin-top:24px;max-width:420px">
+      <div class="input-group">
+        <label class="input-label">Notes (optional)</label>
+        <textarea class="input-field" style="min-height:96px;resize:vertical" placeholder="Describe what this key is used for..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. CARDS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Cards</div>
+    <div class="section-sub">Dark surface, subtle border, purple-tinted shadow.</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">Standard Card</div>
+        <div class="card-body">Use for dashboard panels, content sections, and grouped information. Padding 24px, rounded-lg.</div>
+      </div>
+      <div class="card card-interactive">
+        <div class="card-title">Interactive Card</div>
+        <div class="card-body">Hover to see border-strong and shadow-md. Used for API key rows and selectable items.</div>
+      </div>
+      <div class="card" style="border-color:rgba(124,58,237,.35);box-shadow:var(--shadow-lg)">
+        <div class="card-title" style="color:#A78BFA">Featured Card</div>
+        <div class="card-body">Used for highlighted plans, important notices. Purple border at 35% opacity.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div class="label-small">API Key Code Display Card</div>
+    <div class="card" style="max-width:520px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:600;color:#C5C3D8">Your API Key</span>
+        <span style="font-size:11px;color:#9490AD">Shown once only</span>
+      </div>
+      <div class="code-block">pxs_live_a3f9d2c1b8e4k7m2n6p0q5r1s8t3</div>
+      <p style="font-size:12px;color:#9490AD;margin-top:10px">Store this key in your environment variables. It will not be shown again.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 9. BADGES -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Badges</div>
+    <div class="section-sub">Compact labels for status, categories, and counts.</div>
+    <div class="flex gap-3 items-center" style="flex-wrap:wrap">
+      <span class="badge badge-primary">API Key</span>
+      <span class="badge badge-success">Active</span>
+      <span class="badge badge-warning">Near Limit</span>
+      <span class="badge badge-error">Revoked</span>
+      <span class="badge badge-neutral">WebP</span>
+      <span class="badge badge-neutral">PNG</span>
+      <span class="badge badge-neutral">100/hr</span>
+    </div>
+  </div>
+</div>
+
+<!-- 10. ALERTS -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Alerts</div>
+    <div class="section-sub">Left border, semantic background. Never expose raw error messages.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:640px">
+      <div class="alert alert-success">
+        <div class="alert-icon">✓</div>
+        <div><div class="alert-title">API key created</div><div class="alert-body">Your key has been created. Store it somewhere safe — it won't be shown again.</div></div>
+      </div>
+      <div class="alert alert-warning">
+        <div class="alert-icon">⚠</div>
+        <div><div class="alert-title">Approaching rate limit</div><div class="alert-body">You have used 87 of your 100 calls this hour.</div></div>
+      </div>
+      <div class="alert alert-error">
+        <div class="alert-icon">✕</div>
+        <div><div class="alert-title">Invalid API key</div><div class="alert-body">The key provided does not match any active keys in our system.</div></div>
+      </div>
+      <div class="alert alert-info">
+        <div class="alert-icon">ℹ</div>
+        <div><div class="alert-title">AVIF encoding is slower</div><div class="alert-body">AVIF conversions may take 2–3× longer than other formats due to the codec complexity.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11. NAVIGATION -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Navigation Bar</div>
+    <div class="section-sub">64px height. Sticky with backdrop blur on scroll. CTA always far right.</div>
+    <div class="navbar">
+      <div class="navbar-logo">Pix<span>Shift</span></div>
+      <div class="navbar-links">
+        <a href="#" class="navbar-link">Docs</a>
+        <a href="#" class="navbar-link">Pricing</a>
+        <a href="#" class="navbar-link">Blog</a>
+      </div>
+      <div class="flex gap-3">
+        <button class="btn btn-ghost" style="padding:8px 16px;font-size:14px">Log in</button>
+        <button class="btn btn-primary btn-sm">Get API Key</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12. DASHBOARD PREVIEW -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Dashboard Preview</div>
+    <div class="section-sub">API key management + usage stats. The core of the product.</div>
+
+    <div class="grid-2" style="gap:32px;align-items:start">
+      <div>
+        <div class="label-small">API Keys</div>
+        <div class="dashboard-shell">
+          <div class="dash-header">
+            <div class="dash-title">Your API Keys</div>
+            <button class="btn btn-primary btn-sm">+ New Key</button>
+          </div>
+          <div class="dash-body">
+            <div class="dash-row">
+              <div>
+                <div class="dash-key-name">Production</div>
+                <div class="dash-key-prefix">pxs_live_a3f9d2...</div>
+              </div>
+              <div style="text-align:right">
+                <span class="badge badge-success" style="margin-bottom:4px;display:inline-block">Active</span>
+                <div class="dash-key-meta">Created Jun 11</div>
+              </div>
+            </div>
+            <div class="dash-row">
+              <div>
+                <div class="dash-key-name">Development</div>
+                <div class="dash-key-prefix">pxs_live_b7c2e1...</div>
+              </div>
+              <div style="text-align:right">
+                <span class="badge badge-success" style="margin-bottom:4px;display:inline-block">Active</span>
+                <div class="dash-key-meta">Created Jun 9</div>
+              </div>
+            </div>
+            <div class="dash-row">
+              <div>
+                <div class="dash-key-name">Old staging key</div>
+                <div class="dash-key-prefix">pxs_live_c9d3f2...</div>
+              </div>
+              <div style="text-align:right">
+                <span class="badge badge-error" style="margin-bottom:4px;display:inline-block">Revoked</span>
+                <div class="dash-key-meta">Jun 7 · Revoked</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="label-small">Usage Stats</div>
+        <div class="stat-grid" style="margin-bottom:16px">
+          <div class="stat-card">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Calls today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">87</div>
+            <div class="stat-label">This month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color:#A78BFA">5</div>
+            <div class="stat-label">This hour</div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:600">Rate limit</span>
+            <span style="font-size:13px;color:#9490AD">5 / 100 per hour</span>
+          </div>
+          <div style="height:6px;background:#252342;border-radius:999px;overflow:hidden">
+            <div style="width:5%;height:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);border-radius:999px"></div>
+          </div>
+          <div style="font-size:12px;color:#5A5770;margin-top:8px">95 calls remaining this hour</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13. HERO SECTION -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Landing Page — Hero</div>
+    <div class="section-sub">Full-width, centered, radial purple glow behind headline.</div>
+    <div class="hero">
+      <div class="hero-eyebrow">✦ &nbsp;Image conversion API built for developers</div>
+      <h1>Convert images<br>at <span>API speed</span></h1>
+      <p>PNG, JPG, WebP, AVIF — any format, any size. Authenticate once, convert forever. No per-format pricing, no dashboard surprises.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary btn-lg">Get your API key</button>
+        <button class="btn btn-secondary btn-lg">View the docs</button>
+      </div>
+      <div class="hero-code">
+        <div class="code-block">curl -X POST https://api.pixshift.io/v1/convert \<br>
+&nbsp;&nbsp;-H "X-API-Key: pxs_live_xxxxxxxxxxxx" \<br>
+&nbsp;&nbsp;-F "file=@photo.png" \<br>
+&nbsp;&nbsp;-F "target_format=webp" \<br>
+&nbsp;&nbsp;--output result.webp</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14. FEATURE GRID -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Landing Page — Feature Grid</div>
+    <div class="section-sub">3 columns. Icon + heading + description. Hover lifts the card.</div>
+    <div class="grid-3">
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">Format Conversion</div>
+        <div class="feature-desc">PNG, JPG, WebP, AVIF, GIF, BMP, TIFF. Any to any. One endpoint, clean binary response.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">In-Memory Processing</div>
+        <div class="feature-desc">No temp files. Images are processed in memory and returned directly. Fast, clean, no disk I/O.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔑</div>
+        <div class="feature-title">API Key Management</div>
+        <div class="feature-desc">Create multiple keys from your dashboard. Name them, track usage per key, revoke instantly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Usage Tracking</div>
+        <div class="feature-desc">Calls today, this month, this hour. Per-key breakdown. No black box billing surprises.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡</div>
+        <div class="feature-title">Rate Limiting</div>
+        <div class="feature-desc">100 calls/hour per key. Configurable per plan. Returns 429 with Retry-After header.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <div class="feature-title">OpenAPI Docs</div>
+        <div class="feature-desc">Auto-generated Swagger UI at /docs. Every endpoint, every parameter, every response shape.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15. CTA SECTION -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Landing Page — CTA Section</div>
+    <div class="section-sub">Bottom of the landing page. One action only.</div>
+    <div class="cta-section">
+      <h2>Start converting in 60 seconds</h2>
+      <p>Register, get your key, make your first API call. No credit card required.</p>
+      <button class="btn btn-primary btn-lg">Get your free API key</button>
+    </div>
+  </div>
+</div>
+
+<!-- 16. FOOTER -->
+<div class="section">
+  <div class="container">
+    <div class="section-title">Footer</div>
+    <div class="section-sub">Dark page background. Grouped links. Copyright bar.</div>
+    <div class="footer-preview">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo">Pix<span style="color:#A78BFA">Shift</span></div>
+          <div class="footer-tagline">Image conversion API for developers. Fast, clean, no surprises.</div>
+        </div>
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Features</a>
+            <a href="#" class="footer-link">Pricing</a>
+            <a href="#" class="footer-link">API Docs</a>
+            <a href="#" class="footer-link">Changelog</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Developers</div>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Quick Start</a>
+            <a href="#" class="footer-link">Endpoints</a>
+            <a href="#" class="footer-link">Rate Limits</a>
+            <a href="#" class="footer-link">Status</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <div class="footer-links">
+            <a href="#" class="footer-link">About</a>
+            <a href="#" class="footer-link">GitHub</a>
+            <a href="#" class="footer-link">Privacy</a>
+            <a href="#" class="footer-link">Terms</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2026 PixShift. Built with intent.</div>
+        <div class="footer-copy">atifmanzoor.cloud</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
