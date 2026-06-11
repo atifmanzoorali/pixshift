@@ -28,7 +28,7 @@ export function Sidebar(): JSX.Element {
 
   const handleSignOut = async (): Promise<void> => {
     await signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
   }
 

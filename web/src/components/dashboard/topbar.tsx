@@ -33,7 +33,7 @@ export function Topbar({ title, onMenuClick }: TopbarProps): JSX.Element {
 
   const handleSignOut = async (): Promise<void> => {
     await signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
   }
 

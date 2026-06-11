@@ -34,7 +34,7 @@ export default function ForgotPasswordPage(): JSX.Element {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full flex items-center justify-center">
         <div className="w-full max-w-[400px] text-center">
           <h1 className="text-2xl font-display font-bold text-neutral-50 mb-3">
             Check your email
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="w-full flex items-center justify-center">
       <div className="w-full max-w-[400px]">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-display font-bold text-neutral-50">Reset your password</h1>

@@ -37,7 +37,7 @@ export function MobileDrawer({ open, onClose }: MobileDrawerProps): JSX.Element 
   const handleSignOut = async (): Promise<void> => {
     onClose()
     await signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
   }
 
