@@ -6,12 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
-    "test:unit": "vitest run --reporter=verbose",
+    "test": "vitest",
+    "test:run": "vitest run",
     "lint": "next lint",
-    "format": "prettier --write .",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
     "typecheck": "tsc --noEmit",
-    "db:types": "supabase gen types typescript --linked > src/types/database.types.ts"
+    "prepare": "cd .. && npx --prefix web husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -40,6 +47,8 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
