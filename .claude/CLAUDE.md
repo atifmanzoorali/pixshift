@@ -28,55 +28,59 @@ Python, Docker, Redis, and FastAPI are NOT in this project.
 
 This is a single Next.js app. Everything lives in `web/`.
 
+Files marked `✓` exist. Files marked `→` are planned but not yet built.
+
 ```
 pixshift/
 ├── .claude/              ← project rules (this file)
 ├── web/                  ← the entire application
+│   ├── supabase/         ✓ Supabase CLI config + migrations
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx                    # Landing page
-│   │   │   ├── layout.tsx                  # Root layout — wraps AuthProvider
-│   │   │   ├── globals.css
-│   │   │   ├── (auth)/                     # Route group — no URL segment
-│   │   │   │   ├── login/page.tsx
-│   │   │   │   ├── register/page.tsx
-│   │   │   │   └── forgot-password/page.tsx
+│   │   │   ├── page.tsx                    ✓ Landing page
+│   │   │   ├── layout.tsx                  ✓ Root layout — wraps AuthProvider
+│   │   │   ├── globals.css                 ✓
+│   │   │   ├── (auth)/                     ✓ Route group — no URL segment
+│   │   │   │   ├── layout.tsx              ✓ Logo link back to landing page
+│   │   │   │   ├── login/page.tsx          ✓
+│   │   │   │   ├── register/page.tsx       ✓
+│   │   │   │   └── forgot-password/page.tsx ✓
 │   │   │   ├── auth/
-│   │   │   │   └── callback/route.ts       # Supabase email confirmation handler
+│   │   │   │   └── callback/route.ts       ✓ Supabase email confirmation handler
 │   │   │   ├── dashboard/
-│   │   │   │   ├── layout.tsx              # Dashboard shell (sidebar + topbar)
-│   │   │   │   ├── page.tsx                # Usage overview
-│   │   │   │   └── keys/page.tsx           # API key management
+│   │   │   │   ├── layout.tsx              ✓ Pass-through (shell is in each page)
+│   │   │   │   ├── page.tsx                ✓ Usage overview (stub)
+│   │   │   │   ├── keys/page.tsx           ✓ API key management (stub)
+│   │   │   │   └── settings/page.tsx       ✓ Settings (stub)
 │   │   │   └── api/
 │   │   │       └── v1/
-│   │   │           ├── convert/route.ts    # POST — format conversion via Sharp
-│   │   │           ├── compress/route.ts   # POST — quality compression via Sharp
-│   │   │           ├── resize/route.ts     # POST — dimension resize via Sharp
-│   │   │           ├── keys/route.ts       # GET / POST / DELETE — API key management
-│   │   │           └── usage/route.ts      # GET — usage stats per key
+│   │   │           ├── convert/route.ts    → POST — format conversion via Sharp
+│   │   │           ├── compress/route.ts   → POST — quality compression via Sharp
+│   │   │           ├── resize/route.ts     → POST — dimension resize via Sharp
+│   │   │           ├── keys/route.ts       → GET / POST / DELETE — API key management
+│   │   │           └── usage/route.ts      → GET — usage stats per key
 │   │   ├── components/
-│   │   │   ├── ui/                         # shadcn/ui base components
-│   │   │   ├── landing/                    # Landing page sections
-│   │   │   ├── dashboard/                  # Dashboard-specific components
-│   │   │   └── shared/                     # Used across multiple pages
+│   │   │   ├── landing/                    ✓ All landing page sections
+│   │   │   ├── dashboard/                  ✓ Sidebar, topbar, mobile drawer, shell
+│   │   │   ├── ui/                         → shadcn/ui base components (add as needed)
+│   │   │   └── shared/                     → Cross-page components (add as needed)
 │   │   ├── services/
-│   │   │   ├── auth.service.ts             # signUp(), signIn(), signOut(), resetPassword()
-│   │   │   ├── keys.service.ts             # createKey(), listKeys(), revokeKey()
-│   │   │   └── usage.service.ts            # getUsage()
+│   │   │   ├── auth.service.ts             ✓ signUp(), signIn(), signOut(), resetPassword()
+│   │   │   ├── keys.service.ts             → createKey(), listKeys(), revokeKey()
+│   │   │   └── usage.service.ts            → getUsage()
 │   │   ├── hooks/
-│   │   │   ├── useAuth.tsx                 # AuthProvider + useAuth hook
-│   │   │   └── useApiKeys.ts               # API key state management
+│   │   │   ├── useAuth.tsx                 ✓ AuthProvider + useAuth hook
+│   │   │   └── useApiKeys.ts               → API key state management
 │   │   ├── lib/
 │   │   │   ├── supabase/
-│   │   │   │   ├── client.ts               # createBrowserClient — for 'use client' files
-│   │   │   │   └── server.ts               # createServerClient — for Server Components + Route Handlers
-│   │   │   └── utils.ts                    # cn() helper, formatters
-│   │   ├── middleware.ts                    # Supabase session refresh + route protection
+│   │   │   │   ├── client.ts               ✓ createBrowserClient — for 'use client' files
+│   │   │   │   └── server.ts               ✓ createServerClient — for Server Components + Route Handlers
+│   │   │   └── utils.ts                    ✓ cn() helper, formatBytes(), formatDate()
+│   │   ├── middleware.ts                    ✓ Supabase session refresh + route protection
 │   │   └── types/
-│   │       ├── auth.types.ts
-│   │       ├── key.types.ts
-│   │       ├── api.types.ts                # Standard API response shape
-│   │       └── database.types.ts           # Auto-generated from Supabase schema
+│   │       ├── key.types.ts                → API key TypeScript interfaces
+│   │       ├── api.types.ts                ✓ Standard API response shape
+│   │       └── database.types.ts           ✓ Auto-generated from Supabase schema
 │   └── public/
 ├── docs/
 │   ├── architecture.md
@@ -236,13 +240,44 @@ Never return raw Supabase errors, raw Sharp errors, or unstructured responses.
 
 ---
 
+## Supabase Project
+
+- **Project ref:** `uvfeqoisjxdmvzxqnpis`
+- **Project URL:** `https://uvfeqoisjxdmvzxqnpis.supabase.co`
+- **Dashboard:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis`
+- **API keys page:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis/settings/api`
+
+**Tables already created:** `profiles` (with trigger on auth.users), `api_keys`, `usage_logs`
+
+### Running Schema Changes on This Machine (No Docker)
+
+`npx supabase db push` requires Docker. Docker is not installed on this machine.
+**Alternative:** Run SQL directly via the Supabase Management API:
+
+```bash
+curl -X POST "https://api.supabase.com/v1/projects/uvfeqoisjxdmvzxqnpis/database/query" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "YOUR SQL HERE"}'
+```
+
+Run **one statement per request** — multiple statements in one body causes JSON escaping issues.
+`SUPABASE_ACCESS_TOKEN` is a personal access token from supabase.com/dashboard/account/tokens — never commit it.
+
+After any schema change, regenerate TypeScript types:
+```bash
+npx supabase gen types typescript --linked > src/types/database.types.ts
+```
+
+---
+
 ## Environment Variables
 
 `web/.env.local` (never committed):
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://your-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
+NEXT_PUBLIC_SUPABASE_URL=https://uvfeqoisjxdmvzxqnpis.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ... (get from dashboard settings/api)
+SUPABASE_SERVICE_ROLE_KEY=eyJ... (get from dashboard settings/api)
 ```
 
 `web/.env.example` (always committed — placeholders only):
@@ -341,6 +376,33 @@ At the start of every session, before writing any code:
 3. Read `docs/decisions.md` — the architectural decisions
 
 Only then begin work.
+
+---
+
+## Current Build Status
+
+Last updated: 2026-06-11. Update this section whenever a phase is completed.
+
+### Done
+- [x] Landing page — all sections, Framer Motion animations
+- [x] Auth system — register, login, forgot password, email callback
+- [x] Dashboard shell — sidebar, topbar, mobile drawer, route protection via middleware
+- [x] Supabase project created and linked — ref: `uvfeqoisjxdmvzxqnpis`
+- [x] Database schema — `profiles`, `api_keys`, `usage_logs` tables with RLS
+
+### Next Up (in order)
+- [ ] `src/types/key.types.ts` — TypeScript interfaces for API keys
+- [ ] `src/services/keys.service.ts` — createKey(), listKeys(), revokeKey()
+- [ ] `src/services/usage.service.ts` — getUsage()
+- [ ] `src/hooks/useApiKeys.ts` — API key state management
+- [ ] `src/app/api/v1/keys/route.ts` — GET / POST / DELETE
+- [ ] `src/app/api/v1/usage/route.ts` — GET
+- [ ] Dashboard keys page — API key management UI
+- [ ] Dashboard overview page — usage stats
+- [ ] `src/app/api/v1/convert/route.ts` — Sharp format conversion
+- [ ] `src/app/api/v1/compress/route.ts` — Sharp compression
+- [ ] `src/app/api/v1/resize/route.ts` — Sharp resize
+- [ ] Deploy to Vercel + connect Supabase env vars
 
 ---
 
