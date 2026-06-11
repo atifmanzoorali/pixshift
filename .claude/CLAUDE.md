@@ -247,27 +247,24 @@ Never return raw Supabase errors, raw Sharp errors, or unstructured responses.
 - **Dashboard:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis`
 - **API keys page:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis/settings/api`
 
-**Tables already created:** `profiles` (with trigger on auth.users), `api_keys`, `usage_logs`
+**Tables confirmed in live database:** `profiles` (with trigger on auth.users)
+**Tables still to be created:** `api_keys`, `usage_logs`
 
-### Running Schema Changes on This Machine (No Docker)
+### Running Schema Changes — Use MCP
 
-`npx supabase db push` requires Docker. Docker is not installed on this machine.
-**Alternative:** Run SQL directly via the Supabase Management API:
+Docker is not installed on this machine. Do NOT use `npx supabase db push` or `npx supabase migration new`.
 
-```bash
-curl -X POST "https://api.supabase.com/v1/projects/uvfeqoisjxdmvzxqnpis/database/query" \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "YOUR SQL HERE"}'
-```
+**All schema changes go through the Supabase MCP connector:**
 
-Run **one statement per request** — multiple statements in one body causes JSON escaping issues.
-`SUPABASE_ACCESS_TOKEN` is a personal access token from supabase.com/dashboard/account/tokens — never commit it.
+1. Apply SQL directly using the MCP tool `apply_migration`:
+   - `project_id`: `uvfeqoisjxdmvzxqnpis`
+   - `name`: a short descriptive name (e.g. `create_api_keys_table`)
+   - `query`: the SQL to run
 
-After any schema change, regenerate TypeScript types:
-```bash
-npx supabase gen types typescript --linked > src/types/database.types.ts
-```
+2. Verify the change using the MCP tool `list_tables` with `project_id: uvfeqoisjxdmvzxqnpis`.
+
+3. After any schema change, regenerate TypeScript types using the MCP tool `generate_typescript_types`
+   with `project_id: uvfeqoisjxdmvzxqnpis`. Write the output to `web/src/types/database.types.ts`.
 
 ---
 
