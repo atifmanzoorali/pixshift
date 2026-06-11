@@ -1,0 +1,11 @@
+export { LandingPage } from './landing-page';
+export { Navbar } from './navbar';
+export { HeroSection } from './hero-section';
+export { SocialProofBar } from './social-proof-bar';
+export { ProblemSection } from './problem-section';
+export { FeaturesSection } from './features-section';
+export { HowItWorks } from './how-it-works';
+export { TestimonialsSection } from './testimonials-section';
+export { FAQSection } from './faq-section';
+export { CTASection } from './cta-section';
+export { Footer } from './footer';
