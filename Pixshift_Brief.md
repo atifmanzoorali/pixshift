@@ -4,7 +4,7 @@
 **Updated:** 2026-06-12
 **Goal:** A production-grade, publicly available image conversion SaaS. Users register, manage API keys from a dashboard, and use those keys to call a conversion API. The code quality itself is the portfolio piece.
 **Status:** Feature-complete. Pending Vercel deployment.
-**GitHub:** Public repo — code quality is the pitch, not just the product
+**GitHub:** https://github.com/atifmanzoorali/pixshift — public repo, code quality is the pitch
 
 ---
 

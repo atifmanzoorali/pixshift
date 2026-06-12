@@ -4,6 +4,8 @@
 
 PixShift is a production-grade image conversion SaaS. It is a single Next.js application that does everything: landing page, authentication, a developer dashboard for managing API keys, image conversion endpoints, and full API documentation. Engineers who visit the GitHub repo should not be able to call this AI slop. Code quality is the portfolio piece.
 
+**GitHub:** https://github.com/atifmanzoorali/pixshift
+
 ---
 
 ## Tech Stack — Locked
