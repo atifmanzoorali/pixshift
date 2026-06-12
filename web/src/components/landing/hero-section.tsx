@@ -23,7 +23,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const codeSnippet = `curl -X POST https://api.pixshift.io/v1/convert \\
+const codeSnippet = `curl -X POST https://pixshift.com/api/v1/convert \\
   -H "X-API-Key: pxs_live_xxxxxxxxxxxx" \\
   -F "file=@photo.png" \\
   -F "target_format=webp" \\
@@ -31,34 +31,33 @@ const codeSnippet = `curl -X POST https://api.pixshift.io/v1/convert \\
 
 export function HeroSection(): JSX.Element {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-8 overflow-hidden bg-neutral-900">
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-neutral-900 px-6 md:px-8">
       {/* Background — two-layer glow for depth */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[600px] rounded-full bg-primary/8 blur-[140px]" />
-        <div className="absolute top-[28%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] rounded-full bg-primary/12 blur-[80px]" />
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="bg-primary/8 absolute left-1/2 top-[30%] h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px]" />
+        <div className="bg-primary/12 absolute left-1/2 top-[28%] h-[300px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]" />
       </div>
 
       <motion.div
-        className="relative z-10 max-w-4xl mx-auto text-center pt-24 pb-12"
+        className="relative z-10 mx-auto max-w-4xl pb-12 pt-24 text-center"
         initial="hidden"
         animate="visible"
         variants={stagger}
       >
         {/* Eyebrow badge */}
-        <motion.div variants={slideUp} className="flex justify-center mb-8">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-accent text-sm font-medium tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            Open source image conversion API
+        <motion.div variants={slideUp} className="mb-8 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium tracking-wide text-accent">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+            Developer-first image API
           </span>
         </motion.div>
 
         {/* Headline — scale + blur reveal */}
         <motion.h1
           variants={heroReveal}
-          className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.05] tracking-[-0.03em] text-neutral-50 mb-6"
+          className="mb-6 font-display text-5xl font-bold leading-[1.05] tracking-[-0.03em] text-neutral-50 sm:text-6xl lg:text-7xl"
         >
-          Image conversion API.{' '}
-          <span className="text-accent">Open source.</span>
+          Image conversion API. <span className="text-accent">Open source.</span>
           <br />
           No $150/month invoice.
         </motion.h1>
@@ -66,34 +65,34 @@ export function HeroSection(): JSX.Element {
         {/* Subheadline */}
         <motion.p
           variants={slideUp}
-          className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10 leading-relaxed"
+          className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted md:text-xl"
         >
-          PNG, JPG, WebP, AVIF, GIF — convert, compress, and resize via a clean REST API.
-          One header. One endpoint. One response.
+          PNG, JPG, WebP, AVIF, GIF — convert, compress, and resize via a clean REST API. One
+          header. One endpoint. One response.
         </motion.p>
 
         {/* CTAs */}
         <motion.div
           variants={slideUp}
-          className="flex flex-col sm:flex-row gap-3 justify-center mb-5"
+          className="mb-5 flex flex-col justify-center gap-3 sm:flex-row"
         >
           <Link
             href="/register"
-            className="inline-flex items-center justify-center px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-full transition-all duration-150 text-base shadow-lg hover:shadow-xl hover:scale-[1.02]"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-150 hover:scale-[1.02] hover:bg-primary-hover hover:shadow-xl"
           >
             Create your free account
           </Link>
           <Link
             href="/docs"
-            className="inline-flex items-center justify-center px-8 py-3.5 border border-border hover:border-border-strong text-neutral-200 font-semibold rounded-lg transition-all duration-150 text-base hover:bg-elevated"
+            className="inline-flex items-center justify-center rounded-lg border border-border px-8 py-3.5 text-base font-semibold text-neutral-200 transition-all duration-150 hover:border-border-strong hover:bg-elevated"
           >
             Read the docs
           </Link>
         </motion.div>
 
         {/* Supporting line */}
-        <motion.p variants={slideUp} className="text-sm text-neutral-500 mb-16">
-          No credit card required · Open source · API key in 60 seconds
+        <motion.p variants={slideUp} className="mb-16 text-sm text-neutral-500">
+          No credit card required · API key in 60 seconds · No SDK required
         </motion.p>
 
         {/* Visual centerpiece — terminal code block */}
@@ -101,20 +100,20 @@ export function HeroSection(): JSX.Element {
           initial={{ opacity: 0, y: 48, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-2xl mx-auto text-left"
+          className="mx-auto max-w-2xl text-left"
         >
           {/* Outer glow on the code block */}
           <div className="relative">
             <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-b from-primary/30 to-transparent" />
-            <div className="relative bg-neutral-900 border border-border rounded-xl overflow-hidden shadow-xl">
+            <div className="relative overflow-hidden rounded-xl border border-border bg-neutral-900 shadow-xl">
               {/* Terminal chrome */}
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border bg-elevated">
-                <div className="w-3 h-3 rounded-full bg-neutral-700" />
-                <div className="w-3 h-3 rounded-full bg-neutral-700" />
-                <div className="w-3 h-3 rounded-full bg-neutral-700" />
-                <span className="ml-3 text-xs text-neutral-500 font-mono">terminal</span>
+              <div className="flex items-center gap-1.5 border-b border-border bg-elevated px-4 py-3">
+                <div className="h-3 w-3 rounded-full bg-neutral-700" />
+                <div className="h-3 w-3 rounded-full bg-neutral-700" />
+                <div className="h-3 w-3 rounded-full bg-neutral-700" />
+                <span className="ml-3 font-mono text-xs text-neutral-500">terminal</span>
               </div>
-              <pre className="p-6 text-sm font-mono text-accent leading-7 overflow-x-auto whitespace-pre">
+              <pre className="overflow-x-auto whitespace-pre p-6 font-mono text-sm leading-7 text-accent">
                 <code>{codeSnippet}</code>
               </pre>
             </div>

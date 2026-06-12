@@ -33,7 +33,7 @@ const faqs: FAQ[] = [
   {
     question: 'Is this production-ready or a side project?',
     answer:
-      'The codebase has a full test suite, Alembic database migrations, structured JSON logging, per-key rate limiting, and a custom exception hierarchy with proper HTTP status codes. It is open source — you can read every line and make that judgment yourself.',
+      'The codebase uses TypeScript throughout with strict mode enabled, Supabase for auth and database with Row Level Security on every table, and Zod validation on every request before it reaches the processing layer. SHA-256 key hashing means a compromised database exposes no usable keys. Every API call is logged with its operation, format, file size, and duration — visible in your dashboard.',
   },
   {
     question: 'How are API keys stored? Is my key safe?',
@@ -43,7 +43,7 @@ const faqs: FAQ[] = [
   {
     question: 'How is this different from just writing my own Pillow script?',
     answer:
-      "You could. The difference is what comes with the API: authentication, rate limiting, usage tracking, error handling, structured logging, database migrations, and a test suite — all already built, already tested, already running. Your Pillow script is a script. PixShift is a service.",
+      'You could write your own Sharp script. The difference is what comes with the API: authentication, API key management, usage tracking, input validation, error handling, and a dashboard — all already built and running. Your script is a script. PixShift is a service with an API contract you can depend on.',
   },
 ];
 
@@ -54,10 +54,10 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
     <div className="border-b border-border">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between text-left gap-4 py-6 group"
+        className="group flex w-full items-center justify-between gap-4 py-6 text-left"
         aria-expanded={open}
       >
-        <span className="text-base md:text-lg font-semibold text-neutral-50 group-hover:text-neutral-200 transition-colors duration-150">
+        <span className="text-base font-semibold text-neutral-50 transition-colors duration-150 group-hover:text-neutral-200 md:text-lg">
           {question}
         </span>
         <motion.div
@@ -65,7 +65,7 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
           transition={{ duration: 0.2 }}
           className="flex-shrink-0"
         >
-          <ChevronDown className="w-5 h-5 text-muted" />
+          <ChevronDown className="h-5 w-5 text-muted" />
         </motion.div>
       </button>
 
@@ -79,7 +79,7 @@ function FAQItem({ question, answer }: FAQ): JSX.Element {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <p className="pb-6 text-sm md:text-base text-muted leading-relaxed">{answer}</p>
+            <p className="pb-6 text-sm leading-relaxed text-muted md:text-base">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -91,25 +91,23 @@ export function FAQSection(): JSX.Element {
   return (
     <section
       id="faq"
-      className="w-full bg-neutral-900 px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-32"
+      className="w-full bg-neutral-900 px-6 py-20 md:px-8 md:py-24 lg:px-12 lg:py-32"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         <motion.div
-          className="max-w-2xl mx-auto text-center mb-16"
+          className="mx-auto mb-16 max-w-2xl text-center"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
           variants={fadeUp}
         >
-          <p className="text-primary text-sm font-semibold uppercase tracking-widest mb-4">
-            FAQ
-          </p>
-          <h2 className="text-4xl md:text-5xl font-display font-bold text-neutral-50 tracking-tight">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">FAQ</p>
+          <h2 className="font-display text-4xl font-bold tracking-tight text-neutral-50 md:text-5xl">
             Questions we actually get.
           </h2>
         </motion.div>
 
-        <div className="max-w-3xl mx-auto border-t border-border">
+        <div className="mx-auto max-w-3xl border-t border-border">
           {faqs.map((faq, i) => (
             <FAQItem key={i} question={faq.question} answer={faq.answer} />
           ))}

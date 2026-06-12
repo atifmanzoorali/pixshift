@@ -33,6 +33,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.78.0",
     "sharp": "^0.35.1",
+    "shiki": "^4.2.0",
     "tailwind-merge": "^2.3.0",
     "zod": "^3.25.76"
   },

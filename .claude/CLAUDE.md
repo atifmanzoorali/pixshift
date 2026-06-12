@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-PixShift is a production-grade image conversion SaaS. It is a single Next.js application that does everything: landing page, authentication, a developer dashboard for managing API keys, and image conversion endpoints. Engineers who visit the GitHub repo should not be able to call this AI slop. Code quality is the portfolio piece.
+PixShift is a production-grade image conversion SaaS. It is a single Next.js application that does everything: landing page, authentication, a developer dashboard for managing API keys, image conversion endpoints, and full API documentation. Engineers who visit the GitHub repo should not be able to call this AI slop. Code quality is the portfolio piece.
 
 ---
 
@@ -14,6 +14,8 @@ PixShift is a production-grade image conversion SaaS. It is a single Next.js app
 - **Image Processing:** Sharp (runs in Next.js Route Handlers — no separate server)
 - **Forms:** React Hook Form + Zod
 - **Supabase Client:** @supabase/supabase-js + @supabase/ssr
+- **Syntax Highlighting:** Shiki (server-side, pre-renders HTML for the API docs)
+- **Animations:** Framer Motion (landing page)
 - **Testing:** Vitest
 - **Deployment:** Vercel (free plan)
 
@@ -28,66 +30,74 @@ Python, Docker, Redis, and FastAPI are NOT in this project.
 
 This is a single Next.js app. Everything lives in `web/`.
 
-Files marked `✓` exist. Files marked `→` are planned but not yet built.
-
 ```
 pixshift/
 ├── .claude/              ← project rules (this file)
 ├── web/                  ← the entire application
-│   ├── supabase/         ✓ Supabase CLI config + migrations
+│   ├── supabase/         Supabase CLI config + migrations
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx                    ✓ Landing page
-│   │   │   ├── layout.tsx                  ✓ Root layout — wraps AuthProvider
-│   │   │   ├── globals.css                 ✓
-│   │   │   ├── (auth)/                     ✓ Route group — no URL segment
-│   │   │   │   ├── layout.tsx              ✓ Logo link back to landing page
-│   │   │   │   ├── login/page.tsx          ✓
-│   │   │   │   ├── register/page.tsx       ✓
-│   │   │   │   └── forgot-password/page.tsx ✓
+│   │   │   ├── page.tsx                    Landing page
+│   │   │   ├── layout.tsx                  Root layout — wraps AuthProvider
+│   │   │   ├── globals.css
+│   │   │   ├── docs/page.tsx               Public API docs (no auth required)
+│   │   │   ├── (auth)/                     Route group — no URL segment
+│   │   │   │   ├── layout.tsx              Logo link back to landing page
+│   │   │   │   ├── login/page.tsx
+│   │   │   │   ├── register/page.tsx
+│   │   │   │   └── forgot-password/page.tsx
 │   │   │   ├── auth/
-│   │   │   │   └── callback/route.ts       ✓ Supabase email confirmation handler
+│   │   │   │   └── callback/route.ts       Supabase email confirmation handler
 │   │   │   ├── dashboard/
-│   │   │   │   ├── layout.tsx              ✓ Pass-through (shell is in each page)
-│   │   │   │   ├── page.tsx                ✓ Usage overview (stub)
-│   │   │   │   ├── keys/page.tsx           ✓ API key management (stub)
-│   │   │   │   └── settings/page.tsx       ✓ Settings (stub)
+│   │   │   │   ├── layout.tsx              Pass-through (shell is in each page)
+│   │   │   │   ├── page.tsx                Usage overview — stat cards + activity table
+│   │   │   │   ├── keys/page.tsx           API key management
+│   │   │   │   ├── docs/page.tsx           API docs — shows real key prefix banner
+│   │   │   │   └── settings/page.tsx       Profile, password, delete account
 │   │   │   └── api/
 │   │   │       └── v1/
-│   │   │           ├── convert/route.ts    → POST — format conversion via Sharp
-│   │   │           ├── compress/route.ts   → POST — quality compression via Sharp
-│   │   │           ├── resize/route.ts     → POST — dimension resize via Sharp
-│   │   │           ├── keys/route.ts       ✓ GET / POST / DELETE — API key management
-│   │   │           └── usage/route.ts      ✓ GET — usage stats per key
+│   │   │           ├── convert/route.ts    POST — format conversion via Sharp
+│   │   │           ├── compress/route.ts   POST — quality compression via Sharp
+│   │   │           ├── resize/route.ts     POST — dimension resize via Sharp
+│   │   │           ├── keys/route.ts       GET / POST / DELETE — API key management
+│   │   │           ├── usage/route.ts      GET — usage stats + recent logs
+│   │   │           └── account/route.ts    DELETE — delete account and all data
 │   │   ├── components/
-│   │   │   ├── landing/                    ✓ All landing page sections
-│   │   │   ├── dashboard/                  ✓ Sidebar, topbar, mobile drawer, shell
-│   │   │   ├── ui/                         → shadcn/ui base components (add as needed)
-│   │   │   └── shared/                     → Cross-page components (add as needed)
+│   │   │   ├── landing/                    All landing page sections
+│   │   │   ├── dashboard/                  Sidebar, topbar, mobile drawer, shell, ApiKeyCard, CreateKeyDialog
+│   │   │   ├── docs/                       DocsLayout, DocsSections, DocsSidebar, EndpointCard, CodeBlock, ParameterTable, ErrorTable, docs-content.ts
+│   │   │   └── ui/                         shadcn/ui base components (add as needed)
 │   │   ├── services/
-│   │   │   ├── auth.service.ts             ✓ signUp(), signIn(), signOut(), resetPassword()
-│   │   │   ├── keys.service.ts             ✓ createKey(), listKeys(), revokeKey(), verifyKey()
-│   │   │   └── usage.service.ts            ✓ getLogs(), getSummary()
+│   │   │   ├── auth.service.ts             signUp(), signIn(), signOut(), resetPassword(), updateProfile()
+│   │   │   ├── keys.service.ts             createKey(), listKeys(), revokeKey(), verifyKey()
+│   │   │   ├── usage.service.ts            getLogs() with pagination, getSummary() with operation/status breakdown
+│   │   │   └── image.service.ts            convert(), compress(), resize() with duration timing
 │   │   ├── hooks/
-│   │   │   ├── useAuth.tsx                 ✓ AuthProvider + useAuth hook
-│   │   │   └── useApiKeys.ts               ✓ keys[], loading, error, createKey(), revokeKey(), refresh()
+│   │   │   ├── useAuth.tsx                 AuthProvider + useAuth hook
+│   │   │   ├── useApiKeys.ts               keys[], loading, error, createKey(), revokeKey(), refresh()
+│   │   │   └── useUsage.ts                 summary, logs, total, loading, error, refresh()
 │   │   ├── lib/
 │   │   │   ├── supabase/
-│   │   │   │   ├── client.ts               ✓ createBrowserClient — for 'use client' files
-│   │   │   │   └── server.ts               ✓ createServerClient — for Server Components + Route Handlers
-│   │   │   └── utils.ts                    ✓ cn() helper, formatBytes(), formatDate()
-│   │   ├── middleware.ts                    ✓ Supabase session refresh + route protection
+│   │   │   │   ├── client.ts               createBrowserClient — for 'use client' files
+│   │   │   │   └── server.ts               createServerClient — for Server Components + Route Handlers
+│   │   │   ├── image.ts                    detectFormat() magic bytes, MAX_FILE_SIZE_BYTES, OUTPUT_MIME map
+│   │   │   ├── shiki.ts                    Server-only highlight() helper — wraps Shiki codeToHtml()
+│   │   │   ├── docs-data.ts                buildDocsData() — pre-highlights all code examples in parallel
+│   │   │   └── utils.ts                    cn(), formatBytes(), formatDate()
+│   │   ├── middleware.ts                    Supabase session refresh + route protection
 │   │   └── types/
-│   │       ├── key.types.ts                ✓ ApiKey, CreateApiKeyRequest/Response, ListApiKeysResponse, RevokeApiKeyResponse
-│   │       ├── api.types.ts                ✓ Standard API response shape
-│   │       └── database.types.ts           ✓ Auto-generated from Supabase schema
+│   │       ├── key.types.ts                ApiKey, CreateApiKeyRequest/Response, ListApiKeysResponse, RevokeApiKeyResponse
+│   │       ├── api.types.ts                Standard API response shape
+│   │       └── database.types.ts           Auto-generated from Supabase schema
 │   └── public/
 ├── docs/
+│   ├── api-contracts.md                    Every API endpoint documented (accurate — matches implementation)
 │   ├── architecture.md
-│   ├── api-contracts.md
 │   ├── decisions.md
+│   ├── design-reference.html               Design system reference — colors, typography, tokens
 │   └── lessons.md
 ├── DESIGN.md
+├── Pixshift_Brief.md                       Project brief — accurate as of 2026-06-12
 ├── .gitignore
 └── README.md
 ```
@@ -105,7 +115,7 @@ Route Handlers contain no business logic. Services contain no component state. C
 **Supabase Session (for the dashboard user)**
 - Who uses it: the person logged into the PixShift website
 - How it works: Supabase session is stored in an httpOnly cookie, refreshed by middleware on every request
-- Used for: all dashboard operations — creating/listing/revoking API keys, viewing usage
+- Used for: all dashboard operations — creating/listing/revoking API keys, viewing usage, settings, account deletion
 - Verified via: `supabase.auth.getUser()` in Route Handlers that serve the dashboard
 
 **API Key (X-API-Key header — for developers calling the image API)**
@@ -201,6 +211,8 @@ Every Route Handler returns this exact shape.
 
 Never return raw Supabase errors, raw Sharp errors, or unstructured responses.
 
+**Note:** Image endpoints (`/convert`, `/compress`, `/resize`) are the only exception — they return binary (`new Response(new Uint8Array(output), ...)`) with the correct `Content-Type` header. Errors from these endpoints still use the standard JSON shape.
+
 ### Standard Error Codes
 
 | Code | HTTP Status | Meaning |
@@ -222,9 +234,12 @@ Never return raw Supabase errors, raw Sharp errors, or unstructured responses.
 - Max file size: **4MB** — Vercel free plan request body limit is 4.5MB
 - Supported input formats: JPEG, PNG, WebP, AVIF, GIF
 - Supported output formats: JPEG, PNG, WebP, AVIF
+- GIF is accepted as input but cannot be an output format
 - All processing is in memory — no temp files written to disk
-- MIME type validated by reading the first bytes of the file (magic bytes) — never trust the file extension
+- MIME type validated by reading the first 12 bytes of the file (magic bytes) — never trust the file extension
+- `detectFormat()` is in `src/lib/image.ts`
 - Sharp runs inside Next.js Route Handlers at `src/app/api/v1/`
+- compress/resize keep the source format — only convert changes the format
 
 ---
 
@@ -380,7 +395,7 @@ Only then begin work.
 Last updated: 2026-06-12. Update this section whenever a phase is completed.
 
 ### Done
-- [x] Landing page — all sections, Framer Motion animations
+- [x] Landing page — all sections, Framer Motion animations, copy corrected to match actual features
 - [x] Auth system — register, login, forgot password, email callback
 - [x] Dashboard shell — sidebar, topbar, mobile drawer, route protection via middleware
 - [x] Supabase project created and linked — ref: `uvfeqoisjxdmvzxqnpis`
@@ -395,9 +410,23 @@ Last updated: 2026-06-12. Update this section whenever a phase is completed.
 - [x] Dashboard overview page — `src/app/dashboard/page.tsx` with stat cards, operation breakdown, recent activity table
 - [x] `src/hooks/useUsage.ts` — summary, logs, total, loading, error, refresh()
 - [x] `src/lib/image.ts` — magic byte detector, MAX_FILE_SIZE_BYTES constant, OUTPUT_MIME map
-- [x] `src/services/image.service.ts` — Sharp convert() with duration timing
-- [x] `src/app/api/v1/convert/route.ts` — POST with API key auth, Zod validation, Sharp conversion, usage logging
+- [x] `src/services/image.service.ts` — convert(), compress(), resize() with duration timing
+- [x] `src/app/api/v1/convert/route.ts` — POST: API key auth, magic bytes check, Sharp conversion, usage logging
+- [x] `src/app/api/v1/compress/route.ts` — POST: same pattern as convert, quality param (1–100), keeps source format
+- [x] `src/app/api/v1/resize/route.ts` — POST: same pattern as convert, width/height/keep_aspect_ratio params
+- [x] `src/app/api/v1/account/route.ts` — DELETE: session auth, cleans usage_logs → api_keys → profiles → auth user
+- [x] `src/services/auth.service.ts` — updateProfile() added (updates auth metadata + profiles table)
+- [x] Dashboard settings page — `src/app/dashboard/settings/page.tsx` — profile, password, danger zone (delete account)
 - [x] Sharp installed (`sharp` + `@types/sharp`)
+- [x] `docs/api-contracts.md` — rewritten to match actual implementation (removed fake endpoints, correct response shapes)
+- [x] API docs — `src/app/docs/page.tsx` (public) + `src/app/dashboard/docs/page.tsx` (shows key prefix banner)
+- [x] Docs components — DocsLayout (IntersectionObserver sidebar), DocsSections, DocsSidebar, EndpointCard (tab switcher), CodeBlock (copy button), ParameterTable, ErrorTable, docs-content.ts
+- [x] `src/lib/shiki.ts` — server-only Shiki wrapper, github-dark theme
+- [x] `src/lib/docs-data.ts` — buildDocsData() pre-highlights all code examples server-side
+- [x] Docs sidebar nav added — BookOpen icon, `/dashboard/docs` route wired in sidebar.tsx + mobile-drawer.tsx
+- [x] Landing page copy corrected — removed false claims (Pillow, BMP/TIFF, open source, rate limiting, OpenAPI), accurate formats and limits throughout
+- [x] `Pixshift_Brief.md` — fully rewritten to match actual implementation (Next.js 14, Sharp, Supabase — not FastAPI/Python)
+- [x] Project folder cleaned — removed test artifacts, dev log, stale planning docs; design-reference.html moved to docs/
 
 ### Key implementation details to remember
 - `keysService.verifyKey()` uses the service role key (bypasses RLS) — image routes have no user session
@@ -405,19 +434,26 @@ Last updated: 2026-06-12. Update this section whenever a phase is completed.
 - `GET /api/v1/usage` accepts `?limit=` (capped at 100) and `?offset=` query params
 - Route Handlers parse JSON body with a `parseBody()` helper that returns `{ ok: false }` on malformed JSON — Zod never receives null
 - `listKeys` returns all keys including revoked — the UI filters to active-only (revoked keys are NOT shown in the dashboard)
-- `docs/decisions.md` was rewritten on 2026-06-12 — old FastAPI/Python ADRs removed, replaced with accurate decisions
 - `CreateKeyDialog` has 3 internal states: idle → submitting → revealed. Backdrop click is blocked in `revealed` state to force key acknowledgement
-- Revoked keys are filtered out of the keys page UI — only active keys shown. `listKeys()` still returns all for potential future use
 - Image routes use API key auth (`X-API-Key` header) — never Supabase session. `keysService.verifyKey()` returns the full `ApiKey` row including `user_id` for usage logging
 - Usage logging for image routes happens inside the route handler (not the service) — logs both success and error cases
-- `imageService.convert()` uses `as any` cast for Sharp's `toFormat()` — `@types/sharp` does not export `FormatEnum` as a named export. The value is always pre-validated by Zod before reaching Sharp
-- Convert endpoint returns a binary `new Response(new Uint8Array(output), ...)` — not `NextResponse.json()`
+- `imageService` uses `type SharpFormat = keyof typeof sharp.format` for the toFormat cast — avoids `any`, derived from the runtime object Sharp exposes
+- All image endpoints return `new Response(new Uint8Array(output), ...)` — not `NextResponse.json()`
 - `detectFormat()` in `src/lib/image.ts` reads first 12 bytes to identify JPEG/PNG/WebP/AVIF/GIF — GIF is accepted as input but cannot be an output format
+- compress/resize keep the source format — they return the same MIME type as the input; only convert changes the format
+- `DELETE /api/v1/account` uses the admin client (service role) — deletes in FK-safe order: usage_logs → api_keys → profiles → auth.admin.deleteUser()
+- Settings page sections are fully independent — each has its own loading/error state with no shared state between them
+- `authService.updateProfile()` updates both `auth.user_metadata` AND the `profiles` table in one call — both must succeed
+- RLS on `profiles` has both SELECT and UPDATE policies — confirmed live in the database
+- `GET /api/v1/keys` does not take a `request` parameter — Next.js allows parameterless route handler signatures when the request object is not needed
+- Dashboard docs page (`/dashboard/docs`) fetches active keys, maps to `ActiveKeyInfo[]`, shows key prefix + name banner — raw key not available (SHA-256 only)
+- `DocsLayout` uses IntersectionObserver with `rootMargin: '-72px 0px -60% 0px'` to track active sidebar section
+- `DocsSections` is not a Client Component — it receives pre-highlighted `DocsData` props from the Server Component page and passes them down to Client Components (`EndpointCard`, `CodeBlock`, etc.)
+- `buildDocsData()` in `src/lib/docs-data.ts` calls Shiki in parallel with `Promise.all` — one call per code block per endpoint
 
 ### Next Up (in order)
-- [ ] `src/app/api/v1/compress/route.ts` — Sharp quality compression (same auth + validation pattern as convert)
-- [ ] `src/app/api/v1/resize/route.ts` — Sharp dimension resize (same auth + validation pattern as convert)
 - [ ] Deploy to Vercel + connect Supabase env vars
+- [ ] Merge `feature/supabase-auth` to `main` after deployment confirmed
 
 ---
 

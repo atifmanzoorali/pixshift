@@ -1,16 +1,16 @@
 # Project: PixShift — Image Conversion SaaS
 
 **Started:** 2026-06-09
-**Updated:** 2026-06-11
+**Updated:** 2026-06-12
 **Goal:** A production-grade, publicly available image conversion SaaS. Users register, manage API keys from a dashboard, and use those keys to call a conversion API. The code quality itself is the portfolio piece.
-**Status:** Planning
+**Status:** Feature-complete. Pending Vercel deployment.
 **GitHub:** Public repo — code quality is the pitch, not just the product
 
 ---
 
 ## Why This Project
 
-Most image conversion APIs charge $84–150/month for what is, at its core, a Pillow operation. The gap is in packaging: a proper web app, user authentication, API key management, rate limiting, versioned endpoints, structured logging, and clean architecture. That packaging is what this project builds.
+Most image conversion APIs charge $84–150/month for what is, at its core, a Sharp operation. The gap is in packaging: a proper web app, user authentication, API key management, versioned endpoints, and clean architecture. That packaging is what this project builds.
 
 Secondary goal: prove that a non-engineer can direct AI to produce code that passes scrutiny from established engineers. The GitHub repo is a direct response to the "you must have coding experience" filter — it shows what production-grade looks like, built without a traditional coding background.
 
@@ -20,52 +20,55 @@ No payments in this phase. Ship the technical foundation first.
 
 ## What It Is
 
-PixShift is a two-part product:
+PixShift is a single Next.js application. It does everything: landing page, authentication, developer dashboard, and image processing API endpoints. There is no separate backend service.
 
-**1. The Web App** — a Next.js frontend that serves as the product interface:
+**The Web App** — Next.js 14 App Router serves as both the product interface and the API:
 - Landing page explaining the product and its value
-- User registration and login (email + password)
-- Dashboard where authenticated users manage everything
+- User registration and login (email + password via Supabase)
+- Dashboard where authenticated users manage API keys and view usage stats
+- API documentation page — accessible both publicly and from inside the dashboard
 
-**2. The API** — a FastAPI Python backend that does the actual image work:
+**The API** — Next.js Route Handlers process images using Sharp:
 - Accepts API keys issued from the dashboard
-- Converts, compresses, and resizes images
-- Enforces rate limits and logs every operation
+- Converts, compresses, and resizes images in memory
+- Logs every operation with format, file size, and duration
 
-These two parts live in one repository, in two separate folders (`/api` and `/web`).
+Everything lives in one repository, in one folder (`/web`).
 
 ---
 
 ## User Flow
 
 1. User lands on the PixShift landing page
-2. User signs up with email + password
-3. User is taken to their dashboard
-4. From the dashboard, user creates one or more API keys (e.g. one for dev, one for prod)
-5. User copies the API key — it is shown once at creation, never again
-6. User uses that key in their code to call the image conversion endpoints
-7. User can return to the dashboard at any time to see all their keys, revoke a key, or create a new one
-8. Dashboard also shows usage stats: calls today, calls this month, rate limit status
+2. User signs up with email + password (Supabase handles auth)
+3. User confirms their email (Supabase sends the confirmation link)
+4. User is taken to their dashboard
+5. From the dashboard, user creates one or more API keys (e.g. one for dev, one for prod)
+6. User copies the raw API key — it is shown once at creation, never again
+7. User stores the key in their environment variables
+8. User calls image endpoints from their own code using the `X-API-Key` header
+9. User returns to the dashboard to see usage stats, create more keys, or revoke existing ones
 
 ---
 
 ## What It Does
 
-### Web App (Next.js)
-- Landing page: product description, feature list, quick start example, call to action
-- Auth pages: Sign Up, Log In, Forgot Password
-- Dashboard: API key management, usage overview
-- API key management: create key, name it, see when it was created, copy it, revoke it
-- Usage view: calls today, calls this month, per-key breakdown
+### Web App (Next.js — dashboard + marketing)
+- Landing page: product description, feature list, how-it-works, FAQ, call to action
+- Auth pages: Sign Up, Log In, Forgot Password (all via Supabase email/password)
+- Dashboard overview: total calls, successful calls, failed calls, breakdown by operation, recent activity table
+- API key management: create key, name it, see key prefix, revoke it, copy reminder
+- Settings page: update display name, change password, delete account
+- API docs: full reference — public at `/docs`, with real key prefix shown inside `/dashboard/docs`
 
-### API (FastAPI)
-- Format conversion: PNG → WebP, JPG → PNG, etc.
-- Compression: control output quality (1–100)
-- Resize: set width × height with optional aspect ratio lock
-- Usage endpoint: returns usage data for the authenticated API key
+### Image API (Next.js Route Handlers — developer-facing)
+- Format conversion: JPEG → WebP, PNG → AVIF, etc.
+- Compression: control output quality (1–100), keeps source format
+- Resize: set width × height, optional aspect ratio lock, caps at 5000px
 
-**Supported input formats:** PNG, JPG/JPEG, WebP, AVIF, GIF, BMP, TIFF
-**Supported output formats:** PNG, JPG, WebP, AVIF
+**Supported input formats:** JPEG, PNG, WebP, AVIF, GIF
+**Supported output formats:** JPEG, PNG, WebP, AVIF
+**Note:** GIF is accepted as input but cannot be the output format. Format is detected by reading the first 12 bytes of the file — the extension is ignored.
 
 ---
 
@@ -73,39 +76,18 @@ These two parts live in one repository, in two separate folders (`/api` and `/we
 
 Every choice has a reason. No random libraries.
 
-### API Backend
-
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Framework | **FastAPI** | Async, type-safe, auto-generates Swagger/OpenAPI docs, industry standard for Python APIs |
-| Image processing | **Pillow** | Native Python, handles all target formats, no third-party cost |
-| Database | **PostgreSQL** | Production-appropriate, not SQLite. Shows the project was built to scale |
-| ORM | **SQLAlchemy 2.x (async)** | Async-native, widely used, Alembic migrations included |
-| Migrations | **Alembic** | Schema versioned properly — not "recreate tables on startup" |
-| Validation | **Pydantic v2** | All inputs and outputs typed and validated. No raw dicts |
-| Settings | **pydantic-settings** | Config from environment variables with type safety |
-| Rate limiting | **SlowAPI** (dev) / **Redis** (prod) | Per-key rate limiting, not global |
-| Testing | **Pytest + httpx** | Async test client, proper fixtures |
-| Logging | **Python logging + structlog** | Structured JSON logs, not print() statements |
-
-### Web Frontend
-
-| Layer | Choice | Why |
-|-------|--------|-----|
-| Framework | **Next.js 14 + TypeScript** | Handles landing page + dashboard in one framework. Server-side rendering for SEO. Industry standard for SaaS frontends |
+| Framework | **Next.js 14 (App Router) + TypeScript** | Single codebase for landing page, dashboard, and API. Server Components + Route Handlers eliminate the need for a separate backend service |
 | Styling | **Tailwind CSS** | Fast to build, clean output, no CSS file bloat |
 | UI components | **shadcn/ui** | Accessible, unstyled-by-default components — no design lock-in |
-| Forms | **React Hook Form + Zod** | Type-safe form validation that matches the API's validation approach |
-| HTTP client | **Axios** | Consistent request/response handling across all API calls |
-| Auth state | **JWT stored in httpOnly cookie** | Secure, no localStorage token exposure |
-
-### Infrastructure
-
-| Layer | Choice | Why |
-|-------|--------|-----|
-| Containerization | **Docker + docker-compose** | One command to run the full stack — DB + API + Redis |
-| Database | **PostgreSQL** (shared by both parts) | One source of truth |
-| Cache / Rate limit store | **Redis** | Per-key rate limiting in production |
+| Auth + Database | **Supabase** | Email/password auth with httpOnly cookie session, PostgreSQL, Row Level Security on every table |
+| Image processing | **Sharp** | Node.js native bindings, handles all target formats, runs inside Route Handlers — no separate server needed |
+| Forms | **React Hook Form + Zod** | Type-safe form validation, same Zod schemas used for type inference and runtime validation |
+| Animations | **Framer Motion** | Landing page animations |
+| Syntax highlighting | **Shiki** | Server-side code highlighting in the API docs — pre-rendered HTML sent to the client |
+| Testing | **Vitest** | Unit tests for all service functions |
+| Deployment | **Vercel** | Free plan, native Next.js support |
 
 ---
 
@@ -115,124 +97,82 @@ Every choice has a reason. No random libraries.
 
 ```
 pixshift/
-├── api/                              ← FastAPI backend (Python)
-│   ├── app/
-│   │   ├── main.py                   # App factory, middleware, router mounting
-│   │   ├── config.py                 # pydantic-settings config
-│   │   │
-│   │   ├── api/
-│   │   │   └── v1/
-│   │   │       ├── router.py         # Mounts all v1 routes
-│   │   │       └── routes/
-│   │   │           ├── auth.py       # POST /auth/register, POST /auth/login
-│   │   │           ├── keys.py       # POST /keys, GET /keys, DELETE /keys/{id}
-│   │   │           ├── convert.py    # POST /convert, POST /compress, POST /resize
-│   │   │           ├── usage.py      # GET /usage
-│   │   │           └── health.py     # GET /health
-│   │   │
-│   │   ├── core/
-│   │   │   ├── security.py           # Password hashing, JWT, API key generation + hashing
-│   │   │   ├── rate_limiter.py       # Per-key rate limit logic
-│   │   │   └── exceptions.py         # Custom exception classes + global handlers
-│   │   │
-│   │   ├── models/
-│   │   │   ├── user.py               # SQLAlchemy model: User
-│   │   │   ├── api_key.py            # SQLAlchemy model: APIKey
-│   │   │   └── usage_log.py          # SQLAlchemy model: UsageLog
-│   │   │
-│   │   ├── schemas/
-│   │   │   ├── auth.py               # Pydantic: RegisterRequest, LoginRequest, TokenResponse
-│   │   │   ├── keys.py               # Pydantic: CreateKeyRequest, KeyResponse, KeyListResponse
-│   │   │   ├── convert.py            # Pydantic: ConvertResponse, CompressRequest, ResizeRequest
-│   │   │   └── usage.py              # Pydantic: UsageResponse
-│   │   │
-│   │   ├── services/
-│   │   │   ├── auth_service.py       # Register, login, JWT issuance
-│   │   │   ├── key_service.py        # Create, list, revoke API keys
-│   │   │   ├── image_service.py      # Convert, compress, resize via Pillow
-│   │   │   └── usage_service.py      # Log and query usage per API key
-│   │   │
-│   │   ├── db/
-│   │   │   ├── database.py           # Async engine, session factory, get_db dependency
-│   │   │   └── base.py               # SQLAlchemy Base
-│   │   │
-│   │   └── utils/
-│   │       ├── validators.py         # File size check, MIME type check (magic bytes)
-│   │       └── file_helpers.py       # In-memory BytesIO handling
-│   │
-│   ├── tests/
-│   │   ├── conftest.py               # Fixtures: test DB, test client, sample images, test user
-│   │   ├── test_auth.py              # Register, login, duplicate email, invalid credentials
-│   │   ├── test_keys.py              # Create key, list keys, revoke key, unauthorized access
-│   │   ├── test_convert.py           # Format conversion, unsupported format, oversized file
-│   │   ├── test_compress.py          # Quality bounds, invalid quality value
-│   │   └── test_health.py            # Health check, DB connectivity
-│   │
-│   ├── alembic/
-│   │   ├── env.py
-│   │   └── versions/                 # One file per migration
-│   │
-│   ├── .env.example
-│   ├── requirements.txt
-│   └── requirements-dev.txt
-│
-├── web/                              ← Next.js frontend (TypeScript)
+├── .claude/              ← project rules (CLAUDE.md)
+├── web/                  ← the entire application
+│   ├── supabase/         ← Supabase CLI config + migrations
 │   ├── src/
-│   │   ├── app/                      # Next.js App Router
-│   │   │   ├── page.tsx              # Landing page
-│   │   │   ├── layout.tsx            # Root layout
-│   │   │   ├── (auth)/
+│   │   ├── app/
+│   │   │   ├── page.tsx                    Landing page
+│   │   │   ├── layout.tsx                  Root layout — wraps AuthProvider
+│   │   │   ├── globals.css
+│   │   │   ├── docs/page.tsx               Public API docs
+│   │   │   ├── (auth)/                     Route group — no URL segment
 │   │   │   │   ├── login/page.tsx
 │   │   │   │   ├── register/page.tsx
 │   │   │   │   └── forgot-password/page.tsx
-│   │   │   └── dashboard/
-│   │   │       ├── page.tsx          # Dashboard home — usage overview
-│   │   │       └── keys/page.tsx     # API key management
+│   │   │   ├── auth/callback/route.ts      Supabase email confirmation handler
+│   │   │   ├── dashboard/
+│   │   │   │   ├── page.tsx                Usage overview — stat cards + activity table
+│   │   │   │   ├── keys/page.tsx           API key management
+│   │   │   │   ├── docs/page.tsx           Docs with real key prefix shown
+│   │   │   │   └── settings/page.tsx       Profile, password, delete account
+│   │   │   └── api/v1/
+│   │   │       ├── convert/route.ts        POST — format conversion via Sharp
+│   │   │       ├── compress/route.ts       POST — quality compression via Sharp
+│   │   │       ├── resize/route.ts         POST — dimension resize via Sharp
+│   │   │       ├── keys/route.ts           GET / POST / DELETE — API key management
+│   │   │       ├── usage/route.ts          GET — usage stats + recent logs
+│   │   │       └── account/route.ts        DELETE — delete account and all data
 │   │   │
 │   │   ├── components/
-│   │   │   ├── ui/                   # shadcn/ui base components
-│   │   │   ├── landing/              # Landing page sections
-│   │   │   ├── dashboard/            # Dashboard-specific components
-│   │   │   └── shared/               # Used across multiple pages
+│   │   │   ├── landing/                    All landing page sections
+│   │   │   ├── dashboard/                  Sidebar, topbar, mobile drawer, shell
+│   │   │   ├── docs/                       DocsLayout, DocsSections, EndpointCard, CodeBlock, etc.
+│   │   │   └── ui/                         shadcn/ui base components
 │   │   │
 │   │   ├── services/
-│   │   │   ├── auth.service.ts       # login(), register(), logout(), getMe()
-│   │   │   ├── keys.service.ts       # createKey(), listKeys(), revokeKey()
-│   │   │   └── usage.service.ts      # getUsage()
+│   │   │   ├── auth.service.ts             signUp(), signIn(), signOut(), resetPassword(), updateProfile()
+│   │   │   ├── keys.service.ts             createKey(), listKeys(), revokeKey(), verifyKey()
+│   │   │   └── usage.service.ts            getLogs(), getSummary()
 │   │   │
 │   │   ├── hooks/
-│   │   │   ├── useAuth.ts            # Auth state, redirect logic
-│   │   │   └── useApiKeys.ts         # Key CRUD with loading/error states
+│   │   │   ├── useAuth.tsx                 AuthProvider + useAuth hook
+│   │   │   ├── useApiKeys.ts               keys state, loading, error, createKey(), revokeKey(), refresh()
+│   │   │   └── useUsage.ts                 summary, logs, total, loading, error, refresh()
 │   │   │
 │   │   ├── lib/
-│   │   │   ├── axios.ts              # Axios instance with base URL + auth interceptor
-│   │   │   └── utils.ts              # cn() helper, formatters
+│   │   │   ├── supabase/
+│   │   │   │   ├── client.ts               createBrowserClient — for 'use client' files
+│   │   │   │   └── server.ts               createServerClient — for Server Components + Route Handlers
+│   │   │   ├── image.ts                    Magic byte detector, MAX_FILE_SIZE_BYTES, OUTPUT_MIME map
+│   │   │   ├── shiki.ts                    Server-only syntax highlighter helper (Shiki)
+│   │   │   ├── docs-data.ts                Builds pre-highlighted code examples for the docs page
+│   │   │   └── utils.ts                    cn(), formatBytes(), formatDate()
 │   │   │
+│   │   ├── middleware.ts                   Supabase session refresh + route protection
 │   │   └── types/
-│   │       ├── auth.types.ts
-│   │       ├── key.types.ts
-│   │       └── api.types.ts          # Standard API response shape
+│   │       ├── key.types.ts                ApiKey, CreateApiKeyRequest/Response, etc.
+│   │       ├── api.types.ts                Standard API response shape
+│   │       └── database.types.ts           Auto-generated from Supabase schema
 │   │
-│   ├── public/
-│   ├── .env.example
-│   ├── next.config.ts
-│   ├── tailwind.config.ts
-│   └── tsconfig.json
-│
-├── docker/
-│   ├── Dockerfile.api
-│   ├── Dockerfile.web
-│   └── docker-compose.yml            # API + Web + PostgreSQL + Redis
+│   └── public/
 │
 ├── docs/
-│   ├── architecture.md               # How the system is structured and why
-│   ├── api-contracts.md              # Every API endpoint documented
-│   ├── decisions.md                  # ADR log — every major technical decision
-│   └── lessons.md                    # Mistake log — bugs fixed outside tests
+│   ├── architecture.md
+│   ├── api-contracts.md
+│   ├── decisions.md
+│   └── lessons.md
 │
+├── DESIGN.md
 ├── .gitignore
 └── README.md
 ```
+
+**The chain of responsibility — never skip a layer, never merge two layers:**
+
+`Page/Component → Hook → Service → API Route Handler → Supabase / Sharp`
+
+Route Handlers contain no business logic. Services contain no component state. Components make no API calls directly.
 
 ---
 
@@ -240,125 +180,143 @@ pixshift/
 
 All endpoints under `/api/v1/`. Versioned from day one.
 
-### User Authentication (Web App → API)
-
-```
-POST /api/v1/auth/register
-Body: { "email": "user@example.com", "password": "...", "name": "Atif" }
-Response: { "access_token": "...", "token_type": "bearer" }
-
-POST /api/v1/auth/login
-Body: { "email": "user@example.com", "password": "..." }
-Response: { "access_token": "...", "token_type": "bearer" }
-
-GET /api/v1/auth/me
-Header: Authorization: Bearer <jwt_token>
-Response: { "id": "...", "email": "...", "name": "..." }
-```
-
-### API Key Management (Dashboard → API)
+### API Key Management (Dashboard → API — uses Supabase session cookie)
 
 ```
 POST /api/v1/keys
-Header: Authorization: Bearer <jwt_token>
 Body: { "name": "Production" }
-Response: { "id": "...", "name": "Production", "key": "pxs_live_xxxxxx", "message": "Store this key — it will not be shown again." }
+Response: { "success": true, "data": { "id": "...", "name": "Production", "key": "pxs_live_...", "key_prefix": "pxs_live_xxxx", "created_at": "..." } }
+Note: Raw key is returned once. Never stored. Store it now.
 
 GET /api/v1/keys
-Header: Authorization: Bearer <jwt_token>
-Response: [ { "id": "...", "name": "Production", "prefix": "pxs_live_xxxx", "created_at": "...", "last_used_at": "..." } ]
+Response: { "success": true, "data": [ { "id": "...", "name": "Production", "key_prefix": "pxs_live_xxxx", "is_active": true, "created_at": "...", "last_used_at": "..." } ] }
 
-DELETE /api/v1/keys/{key_id}
-Header: Authorization: Bearer <jwt_token>
-Response: { "message": "Key revoked." }
+DELETE /api/v1/keys
+Body: { "id": "uuid" }
+Response: { "success": true, "data": { "message": "Key revoked." } }
 ```
 
-### Image Operations (Developer's Code → API)
+### Usage Stats (Dashboard → API — uses Supabase session cookie)
+
+```
+GET /api/v1/usage?limit=20&offset=0
+Response: {
+  "success": true,
+  "data": {
+    "summary": { "total": 87, "success": 83, "error": 4, "by_operation": { "convert": 40, "compress": 30, "resize": 17 } },
+    "logs": [ { "id": "...", "operation": "convert", "source_format": "png", "target_format": "webp", "file_size_bytes": 204800, "duration_ms": 42, "status": "success", "created_at": "..." } ],
+    "total": 87
+  }
+}
+```
+
+### Image Operations (Developer's Code → API — uses X-API-Key header)
 
 ```
 POST /api/v1/convert
-Header: X-API-Key: pxs_live_xxxxxxxxxxxxxx
-Body: multipart/form-data — file + target_format
-Response: converted image file (binary)
+Header: X-API-Key: pxs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Body: multipart/form-data — file (image) + target_format (jpeg|png|webp|avif)
+Response: converted image binary (Content-Type set to output format)
 
 POST /api/v1/compress
-Header: X-API-Key: pxs_live_xxxxxxxxxxxxxx
-Body: multipart/form-data — file + quality (1–100)
-Response: compressed image file (binary)
+Header: X-API-Key: pxs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Body: multipart/form-data — file (image) + quality (1–100)
+Response: compressed image binary (same format as input)
 
 POST /api/v1/resize
-Header: X-API-Key: pxs_live_xxxxxxxxxxxxxx
-Body: multipart/form-data — file + width + height + keep_aspect_ratio (bool)
-Response: resized image file (binary)
+Header: X-API-Key: pxs_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+Body: multipart/form-data — file (image) + width (integer) + height (integer) + keep_aspect_ratio (boolean)
+Response: resized image binary (same format as input)
 ```
 
-### Usage & Health
+### Account Management (Dashboard → API — uses Supabase session cookie)
 
 ```
-GET /api/v1/usage
-Header: X-API-Key: pxs_live_xxxxxxxxxxxxxx  (or Bearer JWT for dashboard)
-Response: { "calls_today": 12, "calls_this_month": 87, "rate_limit": "100/hour" }
-
-GET /api/v1/health
-Response: { "status": "ok", "db": "connected", "version": "1.0.0" }
+DELETE /api/v1/account
+Response: { "success": true, "data": { "message": "Account deleted." } }
+Note: Deletes in FK-safe order — usage_logs → api_keys → profiles → auth user
 ```
+
+### Standard Error Response
+
+Every error in the system returns this exact shape:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Human-readable description",
+    "code": "MACHINE_READABLE_CODE"
+  }
+}
+```
+
+Standard error codes: `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `FILE_TOO_LARGE` (413), `UNSUPPORTED_MEDIA_TYPE` (415), `RATE_LIMITED` (429), `INTERNAL_ERROR` (500)
 
 ---
 
-## Database Schema
+## Database Schema (Supabase / PostgreSQL)
 
-### users
+### profiles
+Auto-created by a Supabase trigger when a user registers.
+
 | Column | Type | Notes |
 |--------|------|-------|
-| id | UUID | Primary key |
-| email | VARCHAR | Unique |
-| name | VARCHAR | |
-| hashed_password | VARCHAR | bcrypt hash — plain text never stored |
-| created_at | TIMESTAMP | |
-| updated_at | TIMESTAMP | |
+| id | uuid | Primary key, FK → auth.users |
+| email | text | |
+| full_name | text | |
+| created_at | timestamptz | |
 
 ### api_keys
+
 | Column | Type | Notes |
 |--------|------|-------|
-| id | UUID | Primary key |
-| user_id | UUID | Foreign key → users.id |
-| name | VARCHAR | User-defined label (e.g. "Production") |
-| key_prefix | VARCHAR | First 12 chars of key — shown in dashboard |
-| hashed_key | VARCHAR | SHA-256 hash — used for lookup |
-| is_active | BOOLEAN | False = revoked |
-| created_at | TIMESTAMP | |
-| last_used_at | TIMESTAMP | Updated on every successful API call |
+| id | uuid | Primary key |
+| user_id | uuid | FK → auth.users |
+| name | text | Human label — "Production", "My App" |
+| key_hash | text | SHA-256 of the raw key — raw key never stored |
+| key_prefix | text | First 12 chars shown in dashboard (e.g. `pxs_live_xxxx`) |
+| is_active | boolean | False = revoked |
+| created_at | timestamptz | |
+| last_used_at | timestamptz | Updated on every successful image API call |
 
 ### usage_logs
+
 | Column | Type | Notes |
 |--------|------|-------|
-| id | UUID | Primary key |
-| api_key_id | UUID | Foreign key → api_keys.id |
-| endpoint | VARCHAR | e.g. "/api/v1/convert" |
-| source_format | VARCHAR | |
-| target_format | VARCHAR | |
-| file_size_bytes | INTEGER | |
-| duration_ms | INTEGER | |
-| status_code | INTEGER | |
-| created_at | TIMESTAMP | |
+| id | uuid | Primary key |
+| api_key_id | uuid | FK → api_keys |
+| user_id | uuid | FK → auth.users |
+| operation | text | `'convert'` \| `'compress'` \| `'resize'` |
+| source_format | text | `'png'` \| `'jpg'` \| `'webp'` etc. |
+| target_format | text | null for compress/resize (format doesn't change) |
+| file_size_bytes | integer | |
+| duration_ms | integer | |
+| status | text | `'success'` \| `'error'` |
+| created_at | timestamptz | |
+
+Row Level Security is enabled on all three tables. Users can only read and modify their own rows.
 
 ---
 
-## Two Auth Systems — Clearly Separated
+## Two Auth Systems — Never Mixed
 
-This is an important architectural detail. There are two different authentication mechanisms used for different purposes:
+This is the most important architectural detail. There are two completely separate authentication mechanisms used for different callers.
 
-**1. JWT (Bearer token)**
-Used by the web dashboard to authenticate the logged-in user.
-Issued on login. Sent in the `Authorization: Bearer` header.
-Used for: managing API keys, viewing usage, account settings.
+**1. Supabase Session (httpOnly cookie)**
+- Who uses it: the person logged into the PixShift website
+- How it works: Supabase sets a session cookie on login. Middleware refreshes it on every request. Route Handlers verify it with `supabase.auth.getUser()`.
+- Used for: all dashboard operations — creating/listing/revoking API keys, viewing usage, account settings
+- Never used for image processing endpoints
 
 **2. API Key (X-API-Key header)**
-Used by developers in their code to call the image conversion endpoints.
-Issued from the dashboard. Sent in the `X-API-Key` header.
-Used for: convert, compress, resize, usage check.
+- Who uses it: developers calling the image API from their own code
+- How it works: raw key generated on creation, shown once, SHA-256 hash stored in Supabase. Incoming key is hashed and looked up in `api_keys` table.
+- Format: `pxs_live_` prefix + 32 random hex chars
+- Used for: `POST /api/v1/convert`, `POST /api/v1/compress`, `POST /api/v1/resize`
+- Never used for dashboard operations
 
-These are never mixed. The dashboard uses JWT. The API uses API keys.
+If there is any question about which to use — look at who the caller is. Dashboard UI = Supabase session. Developer's application code = API key.
 
 ---
 
@@ -366,51 +324,32 @@ These are never mixed. The dashboard uses JWT. The API uses API keys.
 
 These are the specific things that separate production code from AI slop.
 
-**API (Python/FastAPI)**
-
-1. Type hints on every function signature — mypy runs clean
-2. Custom exception hierarchy:
-   ```python
-   class PixshiftException(Exception): ...
-   class InvalidFormatError(PixshiftException): ...
-   class FileTooLargeError(PixshiftException): ...
-   class RateLimitExceeded(PixshiftException): ...
-   class InvalidAPIKeyError(PixshiftException): ...
-   class InvalidCredentialsError(PixshiftException): ...
-   class KeyNotFoundError(PixshiftException): ...
-   ```
-3. MIME type validation — reads actual file bytes, not the filename extension
-4. Passwords hashed with bcrypt — never stored in plain text
-5. API keys never stored in plain text — SHA-256 hash only
-6. Images processed in memory — no temp files written to disk
-7. Proper HTTP status codes (200, 400, 401, 403, 404, 409, 413, 415, 429, 500)
-8. Structured logging on every request
-9. All config via pydantic-settings — no scattered os.getenv()
-10. Database migrations via Alembic — no create_all() in production
-
-**Web (Next.js/TypeScript)**
-
-1. TypeScript strict mode — no `any` types without justification
-2. Every function has explicit return types
-3. All API calls go through `/services` — no fetch() calls inside components
-4. Auth state managed in one place — not scattered across components
-5. No hardcoded URLs — all in environment variables
-6. Form validation with Zod — same schema used for type inference and runtime validation
-7. Loading and error states handled on every API call — no silent failures
+1. TypeScript strict mode throughout — `tsconfig.json` has `"strict": true`, no `any` types without a comment explaining why
+2. Every function has an explicit return type
+3. All API calls go through `/services` — no fetch() calls inside components or pages
+4. All inputs validated with Zod before processing — bad data returns a clean error, not a server crash
+5. MIME type validated by reading the first 12 bytes of the file (magic bytes) — file extension is never trusted
+6. API keys: SHA-256 hash stored, raw key never written anywhere after creation
+7. Supabase session stored in httpOnly cookie — never localStorage
+8. Images processed in memory — no temp files written to disk
+9. `SUPABASE_SERVICE_ROLE_KEY` is server-only — no `NEXT_PUBLIC_` prefix, never reaches the browser
+10. Standard error response shape on every failure — no raw Supabase errors, no unstructured messages
+11. No function longer than 50 lines, no file longer than 300 lines
+12. No `console.log` committed — all removed before commits
+13. No hardcoded values — constants or environment variables for everything
 
 ---
 
-## File Size & Format Limits
+## Image Processing Limits
 
 | Constraint | Value |
 |-----------|-------|
-| Max file size | 10MB (configurable via env var) |
-| Supported input formats | PNG, JPG, JPEG, WebP, AVIF, GIF, BMP, TIFF |
-| Supported output formats | PNG, JPG, WebP, AVIF |
+| Max file size | 4 MB (Vercel free plan request body limit is 4.5 MB) |
+| Supported input formats | JPEG, PNG, WebP, AVIF, GIF |
+| Supported output formats | JPEG, PNG, WebP, AVIF |
 | Min quality (compress) | 1 |
 | Max quality (compress) | 100 |
 | Max dimension (resize) | 5000px |
-| Rate limit | 100 calls/hour per API key |
 
 ---
 
@@ -420,50 +359,50 @@ The repo is public from the start. The README is written for two audiences simul
 
 **README structure:**
 1. What it does (one paragraph)
-2. Architecture overview (two-part product explained clearly)
-3. Quick start (Docker — running in under 5 minutes)
-4. API reference (every endpoint, with curl examples)
+2. Architecture overview (single Next.js app explained clearly)
+3. Quick start (register, get a key, first curl call)
+4. API reference (every endpoint, with examples)
 5. Design decisions (why this stack, why hash-only key storage, why two auth systems)
 6. Running tests
 7. Environment variables reference
 
 ---
 
-## Phase 1 Scope (This Build)
+## Current Build Status
 
-**API (FastAPI)**
-- [ ] User registration and login (email + password + JWT)
-- [ ] API key creation, listing, and revocation
-- [ ] Format conversion (PNG/JPG/WebP/AVIF/GIF/BMP/TIFF)
-- [ ] Compression with quality control
-- [ ] Resize with aspect ratio option
-- [ ] Per-key rate limiting
-- [ ] Usage tracking
-- [ ] Health check endpoint
-- [ ] Full test suite
-- [ ] Docker + docker-compose
+### Done
+- [x] Landing page — all sections, Framer Motion animations
+- [x] Auth system — register, login, forgot password, email callback
+- [x] Dashboard shell — sidebar, topbar, mobile drawer, route protection via middleware
+- [x] Supabase project created — ref: `uvfeqoisjxdmvzxqnpis`
+- [x] Database schema — `profiles`, `api_keys`, `usage_logs` tables with RLS
+- [x] API key management — create, list, revoke (Route Handler + service + hook + UI)
+- [x] Usage tracking — per-call logging, summary stats, recent activity table
+- [x] Image endpoints — convert, compress, resize (Sharp, magic bytes validation, usage logging)
+- [x] Account deletion — removes all data in FK-safe order
+- [x] Settings page — update profile, change password, delete account
+- [x] API documentation page — public at `/docs`, personalized version at `/dashboard/docs`
+- [x] Sharp installed and working — `sharp` + `@types/sharp`
+- [x] All code committed to `feature/supabase-auth` branch
 
-**Web (Next.js)**
-- [ ] Landing page
-- [ ] Sign up / Log in pages
-- [ ] Dashboard — usage overview
-- [ ] API key management page (create, view, copy, revoke)
-- [ ] Protected routes — dashboard requires login
+### Next Up
+- [ ] Deploy to Vercel + connect Supabase environment variables
+- [ ] Merge `feature/supabase-auth` to `main` after deployment confirmed
 
-**Infrastructure**
-- [ ] docker-compose runs the full stack: API + Web + PostgreSQL + Redis
-- [ ] Public GitHub repo with full README
+---
 
-**Out of scope (Phase 1):**
+## Phase 2 Scope (Not Yet Started)
+
 - Payments / subscription tiers
-- Email verification / password reset
-- Batch conversion
+- Email verification on password change
+- Batch conversion endpoint
 - Webhook callbacks
-- CDN delivery
+- Rate limiting per API key
 - Admin panel
 
 ---
 
 ## Progress Log
-- 2026-06-09: Brief written. Stack decided. Architecture defined.
-- 2026-06-11: Brief updated. Full SaaS product scope confirmed. Frontend (Next.js) added. Two-auth-system architecture defined. Repository structure updated.
+- 2026-06-09: Brief written. Stack decided. Architecture defined (FastAPI + Next.js).
+- 2026-06-11: Brief updated. Full SaaS product scope confirmed. Two-auth-system architecture defined.
+- 2026-06-12: Brief rewritten to reflect actual implementation. Stack changed from FastAPI/Python to single Next.js 14 app. Sharp replaces Pillow. Supabase replaces standalone PostgreSQL + JWT. Docker/Redis not used. Feature-complete build documented accurately.

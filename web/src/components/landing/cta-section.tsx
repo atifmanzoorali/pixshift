@@ -41,49 +41,45 @@ export function CTASection(): JSX.Element {
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'linear-gradient(160deg, #1A0A3E 0%, #0D0720 40%, #09090F 100%)',
+          background: 'linear-gradient(160deg, #1A0A3E 0%, #0D0720 40%, #09090F 100%)',
         }}
         aria-hidden="true"
       />
 
       {/* Radial glow — centered */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-      >
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full blur-[100px]"
+          className="absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
           style={{ background: 'rgba(124, 58, 237, 0.25)' }}
         />
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[200px] rounded-full blur-[60px]"
+          className="absolute left-1/2 top-1/2 h-[200px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[60px]"
           style={{ background: 'rgba(167, 139, 250, 0.15)' }}
         />
       </div>
 
       {/* Top border */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-3xl mx-auto px-6 md:px-8 text-center">
+      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center md:px-8">
         {/* Word-by-word headline */}
         <motion.h2
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-neutral-50 leading-tight tracking-tight mb-8"
+          className="mb-8 font-display text-4xl font-bold leading-tight tracking-tight text-neutral-50 md:text-5xl lg:text-6xl"
         >
           {headlineWords.map((word, i) => (
-            <motion.span key={i} variants={wordReveal} className="inline-block mr-[0.22em]">
+            <motion.span key={i} variants={wordReveal} className="mr-[0.22em] inline-block">
               {word}
             </motion.span>
           ))}
         </motion.h2>
 
         <motion.p
-          className="text-lg md:text-xl text-muted mb-10 leading-relaxed"
+          className="mb-10 text-lg leading-relaxed text-muted md:text-xl"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -97,17 +93,17 @@ export function CTASection(): JSX.Element {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="flex flex-col sm:flex-row gap-3 justify-center"
+          className="flex flex-col justify-center gap-3 sm:flex-row"
         >
           <Link
             href="/register"
-            className="inline-flex items-center justify-center px-10 py-4 bg-white hover:bg-neutral-100 text-primary font-semibold rounded-full transition-all duration-150 text-base shadow-xl hover:scale-[1.02]"
+            className="inline-flex items-center justify-center rounded-full bg-white px-10 py-4 text-base font-semibold text-primary shadow-xl transition-all duration-150 hover:scale-[1.02] hover:bg-neutral-100"
           >
             Create your free account
           </Link>
           <Link
             href="/docs"
-            className="inline-flex items-center justify-center px-8 py-4 border border-white/20 hover:border-white/40 text-neutral-200 font-semibold rounded-lg transition-all duration-150 text-base hover:bg-white/5"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 px-8 py-4 text-base font-semibold text-neutral-200 transition-all duration-150 hover:border-white/40 hover:bg-white/5"
           >
             Read the docs
           </Link>
@@ -120,7 +116,7 @@ export function CTASection(): JSX.Element {
           viewport={{ once: true }}
           variants={fadeUp}
         >
-          No credit card required · Open source · Runs on your infrastructure if you want it to
+          No credit card required · No SDK required · API key in 60 seconds
         </motion.p>
       </div>
 

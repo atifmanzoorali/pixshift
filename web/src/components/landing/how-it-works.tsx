@@ -54,7 +54,7 @@ const steps: Step[] = [
     number: '04',
     label: 'Ship it',
     description:
-      "That's your integration. One endpoint, one header, one response. Add /compress or /resize as needed. The OpenAPI docs at /docs cover everything.",
+      "That's your integration. One endpoint, one header, one response. Add /compress or /resize as needed. The full API reference at /docs covers every parameter, error code, and response format.",
   },
 ];
 
@@ -62,12 +62,12 @@ export function HowItWorks(): JSX.Element {
   return (
     <section
       id="how-it-works"
-      className="w-full bg-neutral-900 px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-32"
+      className="w-full bg-neutral-900 px-6 py-20 md:px-8 md:py-24 lg:px-12 lg:py-32"
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Section header */}
         <motion.div
-          className="max-w-2xl mx-auto text-center mb-20 md:mb-24"
+          className="mx-auto mb-20 max-w-2xl text-center md:mb-24"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
@@ -75,13 +75,13 @@ export function HowItWorks(): JSX.Element {
         >
           <motion.p
             variants={fadeUp}
-            className="text-primary text-sm font-semibold uppercase tracking-widest mb-4"
+            className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary"
           >
             Get started
           </motion.p>
           <motion.h2
             variants={fadeUp}
-            className="text-4xl md:text-5xl font-display font-bold text-neutral-50 leading-tight tracking-tight mb-4"
+            className="mb-4 font-display text-4xl font-bold leading-tight tracking-tight text-neutral-50 md:text-5xl"
           >
             Up and running in under 60 seconds.
           </motion.h2>
@@ -92,7 +92,7 @@ export function HowItWorks(): JSX.Element {
 
         {/* Steps */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-8"
+          className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-8 lg:grid-cols-4"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
@@ -103,7 +103,7 @@ export function HowItWorks(): JSX.Element {
               {/* Dramatic step number — the typographic moment */}
               <motion.span
                 variants={numberReveal}
-                className="font-display font-bold leading-none select-none mb-5 block"
+                className="mb-5 block select-none font-display font-bold leading-none"
                 style={{
                   fontSize: 'clamp(5rem, 8vw, 7rem)',
                   color: 'rgba(124, 58, 237, 0.18)',
@@ -114,10 +114,10 @@ export function HowItWorks(): JSX.Element {
               </motion.span>
 
               <motion.div variants={contentSlide} className="border-l-2 border-border pl-5">
-                <h3 className="text-lg font-semibold text-neutral-50 mb-2 leading-snug">
+                <h3 className="mb-2 text-lg font-semibold leading-snug text-neutral-50">
                   {step.label}
                 </h3>
-                <p className="text-sm text-muted leading-relaxed">{step.description}</p>
+                <p className="text-sm leading-relaxed text-muted">{step.description}</p>
               </motion.div>
             </motion.div>
           ))}
@@ -131,7 +131,7 @@ export function HowItWorks(): JSX.Element {
           viewport={{ once: true, margin: '-80px' }}
           variants={fadeUp}
         >
-          <p className="text-lg md:text-xl font-display font-semibold text-neutral-300">
+          <p className="font-display text-lg font-semibold text-neutral-300 md:text-xl">
             Your image pipeline is now three lines of curl.{' '}
             <span className="text-accent">The rest is just building your product.</span>
           </p>
