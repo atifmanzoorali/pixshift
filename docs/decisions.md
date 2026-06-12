@@ -5,23 +5,23 @@ This file tells the story of why the project is built the way it is.
 
 ---
 
-## ADR-001 | 2026-06-11 | Monorepo structure
+## ADR-001 | 2026-06-11 | Single Next.js application
 
-**Decision:** One repository with two top-level folders: `/api` (FastAPI) and `/web` (Next.js).
+**Decision:** One Next.js 14 app handles everything — landing page, auth, dashboard, and image processing API routes.
 
-**Reason:** Single source of truth for the entire product. Easier to keep API contracts and frontend types in sync. One git history tells the complete story. Simpler for a solo developer.
+**Reason:** Eliminates a service boundary entirely. No separate API server to deploy, no CORS to configure, no network hop between frontend and backend. Sharp runs inside Next.js Route Handlers. Single deployment to Vercel. One git history tells the complete story.
 
-**Alternatives considered:** Separate repos — rejected because it adds coordination overhead for no benefit at this scale.
+**Alternatives considered:** Separate FastAPI + Next.js — rejected because Python/Docker are unnecessary overhead when Sharp handles all image processing natively in Node.js.
 
 ---
 
 ## ADR-002 | 2026-06-11 | Two separate auth systems
 
-**Decision:** JWT Bearer tokens for dashboard operations (web → API). API Keys in X-API-Key header for image conversion (developer code → API).
+**Decision:** Supabase session (httpOnly cookie) for dashboard operations. API keys in `X-API-Key` header for image conversion routes.
 
-**Reason:** These serve fundamentally different use cases. Dashboard users are humans who log in once and work interactively — JWT is the right pattern. Developers integrating the API into code need a static credential they can store in their environment — API keys are the right pattern. Mixing them would force awkward compromises in both directions.
+**Reason:** These serve fundamentally different use cases. Dashboard users are humans who log in once and work interactively — Supabase session is the right pattern. Developers integrating the API into their code need a static credential they can store in an environment variable — API keys are the right pattern. Mixing them would force awkward compromises in both directions.
 
-**Alternatives considered:** Single JWT for everything — rejected because JWTs expire and require refresh logic, making them unsuitable as a stable integration credential.
+**Alternatives considered:** Single session for everything — rejected because sessions expire and require refresh logic, making them unsuitable as a stable integration credential.
 
 ---
 
@@ -29,30 +29,30 @@ This file tells the story of why the project is built the way it is.
 
 **Decision:** Raw API key shown once at creation. Only SHA-256 hash stored in the database. Key prefix stored separately for dashboard display.
 
-**Reason:** This is how Stripe and GitHub do it. If the database is compromised, an attacker gets hashes, not usable keys. Engineers reviewing the code will notice this and recognise it as a deliberate security choice.
+**Reason:** This is how Stripe and GitHub do it. If the database is compromised, an attacker gets hashes, not usable keys. Engineers reviewing the code will recognise this as a deliberate security choice.
 
 ---
 
-## ADR-004 | 2026-06-11 | Images processed in memory (BytesIO)
+## ADR-004 | 2026-06-11 | Images processed in memory via Sharp
 
-**Decision:** All image operations read from BytesIO and write to BytesIO. No temporary files written to disk.
+**Decision:** All image operations are performed in memory using Sharp. No temporary files written to disk.
 
-**Reason:** Eliminates an entire class of bugs: temp file cleanup failures, race conditions between concurrent requests, disk space exhaustion. In-memory processing is also faster. Pillow supports BytesIO natively.
-
----
-
-## ADR-005 | 2026-06-11 | FastAPI + Python for the API
-
-**Decision:** FastAPI with Python, not Node.js.
-
-**Reason:** Pillow is a Python library. Processing images in the same runtime as the API eliminates a service boundary. FastAPI generates OpenAPI docs automatically. The async model handles concurrent image processing requests efficiently.
+**Reason:** Eliminates an entire class of bugs — temp file cleanup failures, race conditions between concurrent requests, disk space exhaustion. In-memory processing is also faster. Sharp supports Buffer input/output natively.
 
 ---
 
-## ADR-006 | 2026-06-11 | Next.js for the web frontend
+## ADR-005 | 2026-06-11 | Supabase for auth and database
 
-**Decision:** Next.js 14 with App Router, not a plain React SPA.
+**Decision:** Supabase handles both authentication and PostgreSQL storage. Row Level Security enforced on all tables.
 
-**Reason:** Handles both the marketing landing page (needs SEO / server-side rendering) and the dashboard (needs client-side interactivity) in one framework. Single deployment unit. Stronger portfolio signal than a plain SPA. TypeScript is first-class.
+**Reason:** Supabase gives email/password auth, a managed Postgres database, and RLS in one service. No need to build auth from scratch or manage a separate database. The `@supabase/ssr` package handles session cookies correctly in Next.js App Router.
+
+---
+
+## ADR-006 | 2026-06-11 | Service layer between Route Handlers and Supabase
+
+**Decision:** Route Handlers never call Supabase directly. All data access goes through `src/services/`.
+
+**Reason:** Route Handlers handle HTTP concerns only — parsing requests, verifying auth, returning responses. Services own business logic and data access. This makes each layer independently testable and keeps the codebase navigable as it grows.
 
 ---

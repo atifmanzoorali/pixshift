@@ -57,8 +57,8 @@ pixshift/
 │   │   │           ├── convert/route.ts    → POST — format conversion via Sharp
 │   │   │           ├── compress/route.ts   → POST — quality compression via Sharp
 │   │   │           ├── resize/route.ts     → POST — dimension resize via Sharp
-│   │   │           ├── keys/route.ts       → GET / POST / DELETE — API key management
-│   │   │           └── usage/route.ts      → GET — usage stats per key
+│   │   │           ├── keys/route.ts       ✓ GET / POST / DELETE — API key management
+│   │   │           └── usage/route.ts      ✓ GET — usage stats per key
 │   │   ├── components/
 │   │   │   ├── landing/                    ✓ All landing page sections
 │   │   │   ├── dashboard/                  ✓ Sidebar, topbar, mobile drawer, shell
@@ -66,11 +66,11 @@ pixshift/
 │   │   │   └── shared/                     → Cross-page components (add as needed)
 │   │   ├── services/
 │   │   │   ├── auth.service.ts             ✓ signUp(), signIn(), signOut(), resetPassword()
-│   │   │   ├── keys.service.ts             → createKey(), listKeys(), revokeKey()
-│   │   │   └── usage.service.ts            → getUsage()
+│   │   │   ├── keys.service.ts             ✓ createKey(), listKeys(), revokeKey(), verifyKey()
+│   │   │   └── usage.service.ts            ✓ getLogs(), getSummary()
 │   │   ├── hooks/
 │   │   │   ├── useAuth.tsx                 ✓ AuthProvider + useAuth hook
-│   │   │   └── useApiKeys.ts               → API key state management
+│   │   │   └── useApiKeys.ts               ✓ keys[], loading, error, createKey(), revokeKey(), refresh()
 │   │   ├── lib/
 │   │   │   ├── supabase/
 │   │   │   │   ├── client.ts               ✓ createBrowserClient — for 'use client' files
@@ -78,7 +78,7 @@ pixshift/
 │   │   │   └── utils.ts                    ✓ cn() helper, formatBytes(), formatDate()
 │   │   ├── middleware.ts                    ✓ Supabase session refresh + route protection
 │   │   └── types/
-│   │       ├── key.types.ts                → API key TypeScript interfaces
+│   │       ├── key.types.ts                ✓ ApiKey, CreateApiKeyRequest/Response, ListApiKeysResponse, RevokeApiKeyResponse
 │   │       ├── api.types.ts                ✓ Standard API response shape
 │   │       └── database.types.ts           ✓ Auto-generated from Supabase schema
 │   └── public/
@@ -247,8 +247,7 @@ Never return raw Supabase errors, raw Sharp errors, or unstructured responses.
 - **Dashboard:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis`
 - **API keys page:** `https://supabase.com/dashboard/project/uvfeqoisjxdmvzxqnpis/settings/api`
 
-**Tables confirmed in live database:** `profiles` (with trigger on auth.users)
-**Tables still to be created:** `api_keys`, `usage_logs`
+**Tables confirmed in live database:** `profiles`, `api_keys`, `usage_logs` — all with RLS enabled
 
 ### Running Schema Changes — Use MCP
 
@@ -378,7 +377,7 @@ Only then begin work.
 
 ## Current Build Status
 
-Last updated: 2026-06-11. Update this section whenever a phase is completed.
+Last updated: 2026-06-12. Update this section whenever a phase is completed.
 
 ### Done
 - [x] Landing page — all sections, Framer Motion animations
@@ -386,19 +385,38 @@ Last updated: 2026-06-11. Update this section whenever a phase is completed.
 - [x] Dashboard shell — sidebar, topbar, mobile drawer, route protection via middleware
 - [x] Supabase project created and linked — ref: `uvfeqoisjxdmvzxqnpis`
 - [x] Database schema — `profiles`, `api_keys`, `usage_logs` tables with RLS
+- [x] `src/types/key.types.ts` — ApiKey, CreateApiKeyRequest/Response, ListApiKeysResponse, RevokeApiKeyResponse
+- [x] `src/services/keys.service.ts` — createKey(), listKeys(), revokeKey(), verifyKey()
+- [x] `src/services/usage.service.ts` — getLogs() with pagination, getSummary() with operation/status breakdown
+- [x] `src/hooks/useApiKeys.ts` — keys state, loading, error, createKey(), revokeKey(), refresh()
+- [x] `src/app/api/v1/keys/route.ts` — GET / POST / DELETE with Zod validation and session auth
+- [x] `src/app/api/v1/usage/route.ts` — GET with pagination params, returns logs + summary in one call
+- [x] Dashboard keys page — `src/app/dashboard/keys/page.tsx` with ApiKeyCard + CreateKeyDialog components
+- [x] Dashboard overview page — `src/app/dashboard/page.tsx` with stat cards, operation breakdown, recent activity table
+- [x] `src/hooks/useUsage.ts` — summary, logs, total, loading, error, refresh()
+- [x] `src/lib/image.ts` — magic byte detector, MAX_FILE_SIZE_BYTES constant, OUTPUT_MIME map
+- [x] `src/services/image.service.ts` — Sharp convert() with duration timing
+- [x] `src/app/api/v1/convert/route.ts` — POST with API key auth, Zod validation, Sharp conversion, usage logging
+- [x] Sharp installed (`sharp` + `@types/sharp`)
+
+### Key implementation details to remember
+- `keysService.verifyKey()` uses the service role key (bypasses RLS) — image routes have no user session
+- `useApiKeys` calls `/api/v1/keys` via fetch — it cannot call `keysService` directly (server-only)
+- `GET /api/v1/usage` accepts `?limit=` (capped at 100) and `?offset=` query params
+- Route Handlers parse JSON body with a `parseBody()` helper that returns `{ ok: false }` on malformed JSON — Zod never receives null
+- `listKeys` returns all keys including revoked — the UI filters to active-only (revoked keys are NOT shown in the dashboard)
+- `docs/decisions.md` was rewritten on 2026-06-12 — old FastAPI/Python ADRs removed, replaced with accurate decisions
+- `CreateKeyDialog` has 3 internal states: idle → submitting → revealed. Backdrop click is blocked in `revealed` state to force key acknowledgement
+- Revoked keys are filtered out of the keys page UI — only active keys shown. `listKeys()` still returns all for potential future use
+- Image routes use API key auth (`X-API-Key` header) — never Supabase session. `keysService.verifyKey()` returns the full `ApiKey` row including `user_id` for usage logging
+- Usage logging for image routes happens inside the route handler (not the service) — logs both success and error cases
+- `imageService.convert()` uses `as any` cast for Sharp's `toFormat()` — `@types/sharp` does not export `FormatEnum` as a named export. The value is always pre-validated by Zod before reaching Sharp
+- Convert endpoint returns a binary `new Response(new Uint8Array(output), ...)` — not `NextResponse.json()`
+- `detectFormat()` in `src/lib/image.ts` reads first 12 bytes to identify JPEG/PNG/WebP/AVIF/GIF — GIF is accepted as input but cannot be an output format
 
 ### Next Up (in order)
-- [ ] `src/types/key.types.ts` — TypeScript interfaces for API keys
-- [ ] `src/services/keys.service.ts` — createKey(), listKeys(), revokeKey()
-- [ ] `src/services/usage.service.ts` — getUsage()
-- [ ] `src/hooks/useApiKeys.ts` — API key state management
-- [ ] `src/app/api/v1/keys/route.ts` — GET / POST / DELETE
-- [ ] `src/app/api/v1/usage/route.ts` — GET
-- [ ] Dashboard keys page — API key management UI
-- [ ] Dashboard overview page — usage stats
-- [ ] `src/app/api/v1/convert/route.ts` — Sharp format conversion
-- [ ] `src/app/api/v1/compress/route.ts` — Sharp compression
-- [ ] `src/app/api/v1/resize/route.ts` — Sharp resize
+- [ ] `src/app/api/v1/compress/route.ts` — Sharp quality compression (same auth + validation pattern as convert)
+- [ ] `src/app/api/v1/resize/route.ts` — Sharp dimension resize (same auth + validation pattern as convert)
 - [ ] Deploy to Vercel + connect Supabase env vars
 
 ---

@@ -35,3 +35,10 @@ htmlcov/
 # Temp
 tmp/
 .cache/
+
+# Test artifacts
+web/tsconfig.tsbuildinfo
+test.png
+compressed.png
+resized.png
+result.webp
