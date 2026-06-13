@@ -326,9 +326,28 @@ The `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS — use it only in server-side Rout
 
 ---
 
+## Deployment — How It Works
+
+**NEVER run `vercel --prod` or any manual Vercel CLI deploy command.**
+
+Deployment is fully automated via GitHub:
+1. Make changes on a feature branch
+2. Merge to `main`
+3. Push to GitHub — Vercel detects the push and automatically builds and deploys to production
+4. `https://pixshift-omega.vercel.app` updates within ~1 minute
+
+Vercel project settings that make this work:
+- Root Directory: `web` (set in Vercel dashboard → Project Settings → Build and Deployment)
+- Production branch: `main` (configured via Vercel dashboard)
+- GitHub repo connected: `atifmanzoorali/pixshift`
+
+If a future agent needs to verify a deployment, use the Vercel MCP `list_deployments` tool with `projectId: prj_FYHHvEDW9eyn3S0M9FBdjzs8ORl1` and `teamId: team_RSGwmpvNtinmT1FxiAVgf61p`.
+
+---
+
 ## Git Branching Strategy
 
-- `main` is always deployable
+- `main` is always deployable — pushing to `main` triggers a live production deployment
 - All work on feature branches: `feature/user-auth`, `fix/key-creation-bug`
 - Merge to main only when: TypeScript compiles clean + feature is complete
 - Delete the branch after merging
