@@ -24,3 +24,13 @@ Repeated mistakes get promoted to permanent rules in CLAUDE.md.
 **Fix applied:** Deleted node_modules with PowerShell `Remove-Item -Recurse -Force`, then ran a single foreground `npm install`.
 **Test added:** No.
 **Promoted to CLAUDE.md rule:** No — operational discipline, not a code rule.
+
+---
+
+## LESSON-003 | 2026-06-13 | Vercel env vars with trailing newlines break fetch headers
+
+**What broke:** Sign-up failed in production with "String contains non ISO-8859-1 code point" — the browser's fetch API rejected the Supabase anon key as an invalid header value.
+**Root cause:** PowerShell string piping (`"value" | vercel env add`) appends a trailing newline. Vercel warned "Value contains newlines" but stored it anyway. The newline in `NEXT_PUBLIC_SUPABASE_ANON_KEY` made it an illegal HTTP header character.
+**Fix applied:** Deleted all 3 env vars with `vercel env rm --yes`, re-added using `printf '%s' 'value' | vercel env add` via Bash — `printf` does not append a newline.
+**Test added:** No.
+**Promoted to CLAUDE.md rule:** No — but always use Bash + `printf '%s'` when piping env var values to the Vercel CLI. Never use PowerShell string piping for this.
