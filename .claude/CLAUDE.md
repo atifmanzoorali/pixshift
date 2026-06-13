@@ -394,7 +394,7 @@ Only then begin work.
 
 ## Current Build Status
 
-Last updated: 2026-06-12. Update this section whenever a phase is completed.
+Last updated: 2026-06-13. Update this section whenever a phase is completed.
 
 ### Done
 - [x] Landing page — all sections, Framer Motion animations, copy corrected to match actual features
@@ -429,6 +429,7 @@ Last updated: 2026-06-12. Update this section whenever a phase is completed.
 - [x] Landing page copy corrected — removed false claims (Pillow, BMP/TIFF, open source, rate limiting, OpenAPI), accurate formats and limits throughout
 - [x] `Pixshift_Brief.md` — fully rewritten to match actual implementation (Next.js 14, Sharp, Supabase — not FastAPI/Python)
 - [x] Project folder cleaned — removed test artifacts, dev log, stale planning docs; design-reference.html moved to docs/
+- [x] Deployed to Vercel — live at https://pixshift-omega.vercel.app — all 17 routes compiled clean, Supabase env vars connected
 
 ### Key implementation details to remember
 - `keysService.verifyKey()` uses the service role key (bypasses RLS) — image routes have no user session
@@ -454,8 +455,7 @@ Last updated: 2026-06-12. Update this section whenever a phase is completed.
 - `buildDocsData()` in `src/lib/docs-data.ts` calls Shiki in parallel with `Promise.all` — one call per code block per endpoint
 
 ### Next Up (in order)
-- [ ] Deploy to Vercel + connect Supabase env vars
-- [ ] Merge `feature/supabase-auth` to `main` after deployment confirmed
+- [ ] Merge `feature/supabase-auth` to `main`
 
 ---
 

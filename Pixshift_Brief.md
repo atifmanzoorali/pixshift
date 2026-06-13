@@ -1,9 +1,10 @@
 # Project: PixShift — Image Conversion SaaS
 
 **Started:** 2026-06-09
-**Updated:** 2026-06-12
+**Updated:** 2026-06-13
 **Goal:** A production-grade, publicly available image conversion SaaS. Users register, manage API keys from a dashboard, and use those keys to call a conversion API. The code quality itself is the portfolio piece.
-**Status:** Feature-complete. Pending Vercel deployment.
+**Status:** Live in production.
+**Live URL:** https://pixshift-omega.vercel.app
 **GitHub:** https://github.com/atifmanzoorali/pixshift — public repo, code quality is the pitch
 
 ---
@@ -386,8 +387,7 @@ The repo is public from the start. The README is written for two audiences simul
 - [x] All code committed to `feature/supabase-auth` branch
 
 ### Next Up
-- [ ] Deploy to Vercel + connect Supabase environment variables
-- [ ] Merge `feature/supabase-auth` to `main` after deployment confirmed
+- [ ] Merge `feature/supabase-auth` to `main`
 
 ---
 
@@ -406,3 +406,4 @@ The repo is public from the start. The README is written for two audiences simul
 - 2026-06-09: Brief written. Stack decided. Architecture defined (FastAPI + Next.js).
 - 2026-06-11: Brief updated. Full SaaS product scope confirmed. Two-auth-system architecture defined.
 - 2026-06-12: Brief rewritten to reflect actual implementation. Stack changed from FastAPI/Python to single Next.js 14 app. Sharp replaces Pillow. Supabase replaces standalone PostgreSQL + JWT. Docker/Redis not used. Feature-complete build documented accurately.
+- 2026-06-13: Deployed to Vercel. Live at https://pixshift-omega.vercel.app. All 17 routes compiled clean. Supabase env vars connected.
