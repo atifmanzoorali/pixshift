@@ -12,7 +12,7 @@
     "format": "prettier --write src",
     "format:check": "prettier --check src",
     "typecheck": "tsc --noEmit",
-    "prepare": "cd .. && npx --prefix web husky"
+    "prepare": "husky || true"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
